@@ -1,0 +1,57 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+body {
+    background-color: black;
+
+    .container {
+        width: 100%;
+        max-height: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        * {
+            width: Min(40rem, 90%);
+        }
+
+        h1,
+        h2 {
+            font-size: 1.5rem;
+            text-align: center;
+        }
+    }
+}
+
+.translation,
+.equation,
+.inputs {
+    border: .2rem solid white;
+    padding: 1rem;
+    margin: 1rem 5rem;
+}
+
+.equation {
+    display: flex;
+    flex-direction: row;
+    * {
+        flex: 0 0 1.5rem;
+    }
+    flex-wrap: wrap;
+}
+
+.inputs {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    * {
+        background-color: white;
+        aspect-ratio: 1;
+        color: black;
+        font-size: 1.5rem;
+    }
+}
