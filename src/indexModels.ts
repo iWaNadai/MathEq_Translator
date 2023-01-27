@@ -106,6 +106,14 @@ function CorrectDecimal(term : WCTTerm) {
     term.element.textContent = term.value
 }
 
+//NUMBER BUTTON LOGIC
+//if sequence is empty or of last term is operator
+    //add number term
+//if last term is number
+    //if last term is negative
+        //add number inside parenthesis
+    //if last number is positive
+        //add number to last term
 export function ButtonNumber(event: Event) {
     let input = (event.target as HTMLElement).dataset.value as string;
     let lastTerm = SEQUENCE[currentIndex]

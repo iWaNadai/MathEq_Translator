@@ -86,6 +86,14 @@ function CorrectDecimal(term) {
     term.value = `${term.value}0`;
     term.element.textContent = term.value;
 }
+//NUMBER BUTTON LOGIC
+//if sequence is empty or of last term is operator
+//add number term
+//if last term is number
+//if last term is negative
+//add number inside parenthesis
+//if last number is positive
+//add number to last term
 export function ButtonNumber(event) {
     let input = event.target.dataset.value;
     let lastTerm = SEQUENCE[currentIndex];
