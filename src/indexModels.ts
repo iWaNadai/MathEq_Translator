@@ -1,3 +1,5 @@
+import { WCTTerm } from "./types"
+
 const TRANSLATION_INDEX : {[key:string]:Function} = {
     '+' : (addend1 : string, addend2 : string) => {       
         if (addend1 === undefined || addend2 === undefined) {
@@ -81,57 +83,142 @@ const TRANSLATION_ELEMENT = document.querySelector(`#translation`) as HTMLElemen
 
 let currentIndex : number = -1;
 const EQUATION_STRING : {val : string, type : ('number'|'operator'), element : HTMLElement}[] = []
+const SEQUENCE : WCTTerm[] = [];
 
-export function Number(e : Event) {
-    const input = (e.target as HTMLElement).dataset.value as string;
-    if (!EQUATION_STRING[currentIndex] || EQUATION_STRING[currentIndex].type === 'operator') {
-        const element = document.createElement('p')
-            element.textContent = (e.target as HTMLElement).dataset.value as string
-        EQUATION_STRING.push({
-            val: input,
-            type: 'number',
-            element: element
-        })
-
-        EQUATION_ELEMENT.append(element)
-        currentIndex++
-        return
+function AddTerm(val : string, type : 'operator' | 'number') {
+    let element = document.createElement('p')
+        element.textContent = val;
+    let term : WCTTerm = {
+        value : val,
+        type : type,
+        element : element
     }
+    SEQUENCE.push(term)
 
-    if (EQUATION_STRING[currentIndex].type === 'number') {
-        EQUATION_STRING[currentIndex].val += (e.target as HTMLElement).dataset.value;
-        EQUATION_STRING[currentIndex].element.textContent = `${EQUATION_STRING[currentIndex].element.textContent}${input}`
+    EQUATION_ELEMENT.append(element)
+    currentIndex++
+}
 
-        return
+function CorrectDecimal(term : WCTTerm) {
+    if (term.value.charAt(term.value.length - 1) !== '.') return
+
+    term.value = `${term.value}0`;
+    term.element.textContent = term.value
+}
+
+export function ButtonNumber(event: Event) {
+    let input = (event.target as HTMLElement).dataset.value as string;
+    let lastTerm = SEQUENCE[currentIndex]
+    
+      //if sequence is empty or if last term is operator
+    if (currentIndex === -1 || lastTerm.type === 'operator') {
+        AddTerm(input, 'number')
+    }
+           //if last term is number
+    else if (lastTerm.type === 'number') {
+        if (lastTerm.value.includes(')')) {
+            let number = lastTerm.value.substring(0,  lastTerm.value.length - 1)
+
+            lastTerm.value = `${number}${input})`
+            lastTerm.element.textContent = lastTerm.value
+        }
+        else {
+            lastTerm.value += input;
+            lastTerm.element.textContent = lastTerm.value    
+        }
+    } 
+}
+
+//ARITHMETIC OPERATOR BUTTON
+//if last term is number
+    //add operator
+export function ButtonOperatorArith(event: Event) {
+    let input = (event.target as HTMLElement).dataset.value as string;
+    let lastTerm = SEQUENCE[currentIndex]
+
+    //if sequence is empty or if last term is operator
+    if (lastTerm.type === 'number') {
+        CorrectDecimal(lastTerm)
+        AddTerm(input, 'operator')
     }
 }
 
-export function ArithOperator(e : Event) {
-    const input = (e.target as HTMLElement).dataset.value as string
+//SIGN BUTTON LOGIC
+//if sequence is empty or if last term is operators
+    //add '(-)'
+//if last term is number
+    //if last term is negative
+        //make last term positive
+    //if last term is positive
+        //make last term negative
+export function ButtonSign() {
+    let lastTerm = SEQUENCE[currentIndex];
 
-    if (EQUATION_STRING[currentIndex].type === 'number') {
-        if (Array.from(EQUATION_STRING[currentIndex].val)[EQUATION_STRING[currentIndex].val.length - 1] === '.') {
-            EQUATION_STRING[currentIndex].val += '0'
-            EQUATION_STRING[currentIndex].element.textContent += '0'
+    //if sequence is empty
+    if (currentIndex === -1 || lastTerm.type === 'operator') {
+        AddTerm('(-)', 'number')
+    }
+    //if sequence has number
+    else if (lastTerm.type === 'number') {
+        if (lastTerm.value.includes('(-')) {
+            lastTerm.value = lastTerm.value.substring(2, lastTerm.value.length - 1)
+            lastTerm.element.textContent = lastTerm.value
+        } else {
+            lastTerm.value = `(-${lastTerm.value})`
+            lastTerm.element.textContent = lastTerm.value
         }
-
-        if (EQUATION_STRING[currentIndex].val.includes('(-') && !EQUATION_STRING[currentIndex].val.includes(')')) {
-            EQUATION_STRING[currentIndex].val += ')'
-            EQUATION_STRING[currentIndex].element.textContent += ')'
-        }
-
-        const element = document.createElement('p')
-            element.textContent = input
-        EQUATION_STRING.push({
-            val: input,
-            type: 'operator',
-            element: element
-        })
-        
-        EQUATION_ELEMENT.append(element)
-        currentIndex++
     }
 }
+
+//DELETE BUTTON LOGIC
+//if lastTerm is operator
+        //delete whole term
+//if last term is number
+    //if number is negative && length === 3
+        //delete whole term
+    //if number is negative && length < 3
+        //delete last number only
+    //if number is positive && length === 1
+        //delete whole term
+    //if number is positive && length < 1
+        //delete last number
+export function ButtonDelete() {
+    let lastTerm = SEQUENCE[currentIndex]
+
+    if (lastTerm === undefined) return
+
+    if (lastTerm.type === 'operator') {
+        lastTerm.element.remove()
+        SEQUENCE.pop()
+        currentIndex--
+    }
+    else if (lastTerm.type === 'number') {
+        if (lastTerm.value.includes('(-') && lastTerm.value.length === 3) {
+            lastTerm.element.remove()
+            SEQUENCE.pop()
+            currentIndex--
+        }
+        else if (lastTerm.value.includes('(-') && lastTerm.value.length > 3){
+            let number = lastTerm.value.substring(0, lastTerm.value.length - 2)
+
+            lastTerm.value = `${number})`
+            lastTerm.element.textContent = lastTerm.value
+
+        }
+        if (!lastTerm.value.includes('(-') && lastTerm.value.length === 1) {
+            lastTerm.element.remove()
+            SEQUENCE.pop()
+            currentIndex--
+        }
+        else if (!lastTerm.value.includes('(-') && lastTerm.value.length > 1){
+            let number = lastTerm.value.substring(0, lastTerm.value.length - 1)
+
+            lastTerm.value = number
+            lastTerm.element.textContent = lastTerm.value
+        }
+    }
+}
+
 
 export function Decimal(e : Event) {
     const input = (e.target as HTMLElement).dataset.value as string
@@ -156,58 +243,6 @@ export function Decimal(e : Event) {
     if (EQUATION_STRING[currentIndex].type === 'number' && !(EQUATION_STRING[currentIndex].val as string).includes('.')) {
         EQUATION_STRING[currentIndex].val += '.'
         EQUATION_STRING[currentIndex].element.textContent += '.'
-    }
-}
-
-export function Delete() {
-    //if current index is valid
-        //if current index is number, and length is > 1
-                    //delete last char if string
-    if (currentIndex > -1) {
-        if (EQUATION_STRING[currentIndex].type === 'number' && (EQUATION_STRING[currentIndex].val as string).length > 1) {
-            console.log(EQUATION_STRING)
-
-            const value = (EQUATION_STRING[currentIndex].val as string).substring(0,(EQUATION_STRING[currentIndex].val as string).length-1)
-            EQUATION_STRING[currentIndex].val = value
-            EQUATION_STRING[currentIndex].element.textContent = value
-        }
-        else {
-            EQUATION_STRING[currentIndex].element.remove()
-            EQUATION_STRING.pop()
-
-            currentIndex--
-        }
-    }
-        
-
-}
-
-export function Sign() {
-    //if there is no number, add a negative sign
-    //if there is a number, reverse its sign
-
-    if (EQUATION_STRING[currentIndex] && EQUATION_STRING[currentIndex].type === 'number') {
-        if (EQUATION_STRING[currentIndex].val.includes('(-')) {
-            EQUATION_STRING[currentIndex].val = EQUATION_STRING[currentIndex].val.substring(2, EQUATION_STRING[currentIndex].val.length)
-            EQUATION_STRING[currentIndex].element.textContent = EQUATION_STRING[currentIndex].element.textContent?.substring(2, EQUATION_STRING[currentIndex].element.textContent?.length as number) as string
-        }
-        else {
-            EQUATION_STRING[currentIndex].val = `(-${EQUATION_STRING[currentIndex].val}`
-            EQUATION_STRING[currentIndex].element.textContent = `(-${EQUATION_STRING[currentIndex].element.textContent}`
-        }
-    }
-    else {
-        const element = document.createElement('p')
-            element.textContent = '(-'
-        EQUATION_STRING.push({
-            val: '(-',
-            type: 'number',
-            element: element
-        })
-
-        EQUATION_ELEMENT.append(element)
-        currentIndex++
-        return
     }
 }
 
