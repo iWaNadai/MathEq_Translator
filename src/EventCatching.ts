@@ -1,4 +1,4 @@
-import { ButtonNumber, ButtonOperatorArith, ButtonDecimal, ButtonDelete, ButtonSign, TranslateSequence, ButtonEqual, ButtonExponent, SEQUENCE } from "./indexModels.js"
+import { ButtonNumber, ButtonOperatorArith, ButtonDecimal, ButtonDelete, ButtonSign, TranslateSequence, ButtonEqual, ButtonExponent, SEQUENCE } from "./ButtonLogic.js"
 
 const NUMBER_BUTTONS = [document.querySelector(`#btn9`) as HTMLButtonElement, 
                         document.querySelector(`#btn8`) as HTMLButtonElement, 

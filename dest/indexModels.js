@@ -46,15 +46,21 @@ const TRANSLATION_INDEX = {
             return;
         }
         let translation = [`${base} to the power ${exponent}`];
-        switch (exponent.charAt(exponent.length - 1)) {
-            case '1':
+        switch (true) {
+            case (exponent === '2'):
+                translation = translation.concat([`${base} squared`, `${base} to the ${exponent}nd power`]);
+                break;
+            case (exponent === '3'):
+                translation = translation.concat([`${base} cubed`, `${base} to the ${exponent}rd power`]);
+                break;
+            case (exponent.charAt(exponent.length - 1) === '1'):
                 translation = translation.concat([`${base} to the ${exponent}st power`]);
                 break;
-            case '2':
-                translation = translation.concat([`${base} to the ${exponent}nd power`, `${base} squared`]);
+            case (exponent.charAt(exponent.length - 1) === '2'):
+                translation = translation.concat([`${base} to the ${exponent}nd power`]);
                 break;
-            case '3':
-                translation = translation.concat([`${base} to the ${exponent}rd power`, `${base} cubed`]);
+            case (exponent.charAt(exponent.length - 1) === '3'):
+                translation = translation.concat([`${base} to the ${exponent}rd power`]);
                 break;
             default:
                 translation = translation.concat([`${base} to the ${exponent}th power`]);
@@ -67,7 +73,7 @@ const EQUATION_ELEMENT = document.querySelector(`#equation`);
 const TRANSLATION_ELEMENT = document.querySelector(`#translation`);
 let currentIndex = -1;
 const EQUATION_STRING = [];
-const SEQUENCE = [];
+export const SEQUENCE = [];
 function AddTerm(val, type) {
     let element = document.createElement('p');
     element.textContent = val;
@@ -81,10 +87,17 @@ function AddTerm(val, type) {
     currentIndex++;
 }
 function CorrectDecimal(term) {
-    if (term.value.charAt(term.value.length - 1) !== '.')
+    if (!term.value.includes('.'))
         return;
-    term.value = `${term.value}0`;
-    term.element.textContent = term.value;
+    if (term.value.includes('(-')) {
+        let number = term.value.substring(2, term.value.length - 1);
+        term.value = `(-${number}0)`;
+        term.element.textContent = term.value;
+    }
+    else {
+        term.value = `${term.value}0`;
+        term.element.textContent = term.value;
+    }
 }
 //NUMBER BUTTON LOGIC
 //if sequence is empty or of last term is operator
@@ -196,55 +209,91 @@ export function ButtonDelete() {
         }
     }
 }
-export function Decimal(e) {
-    const input = e.target.dataset.value;
-    //if current number is operator or there is nothing
-    //add 0.
-    if (currentIndex === -1 || EQUATION_STRING[currentIndex].type === 'operator') {
-        const element = document.createElement('p');
-        element.textContent = `0${input}`;
-        EQUATION_STRING.push({
-            val: `0${input}`,
-            type: 'number',
-            element: element
-        });
-        EQUATION_ELEMENT.append(element);
-        currentIndex++;
+//DECIMAL BUTTON LOGIC
+//if sequence is empty or last term is operator
+//add number term '0.'
+//if last term is number and does not include '.'
+//if last term is negative
+//add decimal to end of number
+//if last term is positive
+//add decimal to end of term
+export function ButtonDecimal() {
+    let lastTerm = SEQUENCE[currentIndex];
+    if (currentIndex === -1 || lastTerm.type === 'operator') {
+        AddTerm('0.', 'number');
     }
-    //if current index is number
-    //add decimal to number
-    if (EQUATION_STRING[currentIndex].type === 'number' && !EQUATION_STRING[currentIndex].val.includes('.')) {
-        EQUATION_STRING[currentIndex].val += '.';
-        EQUATION_STRING[currentIndex].element.textContent += '.';
+    else if (lastTerm.type === 'number' && !lastTerm.value.includes('.')) {
+        if (lastTerm.value.includes('(-')) {
+            let number = lastTerm.value.substring(2, lastTerm.value.length - 1);
+            (number.length >= 1) ? lastTerm.value = `(-${number}.)` : lastTerm.value = `(-${number}0.)`;
+            lastTerm.element.textContent = lastTerm.value;
+        }
+        else if (!lastTerm.value.includes('(-')) {
+            lastTerm.value = `${lastTerm.value}.`;
+            lastTerm.element.textContent = lastTerm.value;
+        }
     }
 }
-export function Equal(e) {
-    if (EQUATION_STRING[currentIndex].type !== 'number')
-        return;
-    const input = e.target.dataset.value;
-    const element = document.createElement('p');
-    element.textContent = e.target.dataset.value;
-    EQUATION_STRING.push({
-        val: input,
-        type: 'operator',
-        element: element
-    });
-    EQUATION_ELEMENT.append(element);
-    currentIndex++;
+//EQUALS BUTTON LOGIC
+//if last term is number
+//add equal sign
+export function ButtonEqual() {
+    let lastTerm = SEQUENCE[currentIndex];
+    if (lastTerm.type === 'number') {
+        CorrectDecimal(lastTerm);
+        AddTerm('=', 'operator');
+    }
 }
-export function Exponent(e) {
-    if (EQUATION_STRING[currentIndex].type !== 'number')
-        return;
-    const input = e.target.dataset.value;
-    const element = document.createElement('p');
-    element.textContent = e.target.dataset.value;
-    EQUATION_STRING.push({
-        val: input,
-        type: 'operator',
-        element: element
-    });
-    EQUATION_ELEMENT.append(element);
-    currentIndex++;
+//EXPONENT BUTTON LOGIC
+//if last term is number
+//add operator
+export function ButtonExponent() {
+    let lastTerm = SEQUENCE[currentIndex];
+    if (lastTerm.type === 'number') {
+        CorrectDecimal(lastTerm);
+        AddTerm('^', 'operator');
+    }
+}
+//TRANSLATION LOGIC
+//have given sequence array
+//loop through sequence and translate all exponents
+//loop through sequence and translate all fractions
+//loop through sequence and translate all divisions and multiplication
+//loop through sequence and translate all addition and subtraction
+//loop through sequence and translate all equal operators
+export function TranslateSequence(sequence) {
+    let sequenceVals = sequence.map(a => a.value);
+    while (sequenceVals.indexOf('^') !== -1) {
+        let opIndex = sequenceVals.indexOf('^');
+        let base = sequenceVals[opIndex - 1];
+        let exponent = sequenceVals[opIndex + 1];
+        sequenceVals.splice(opIndex - 1, 3, TRANSLATION_INDEX['^'](base, exponent));
+    }
+    while (sequenceVals.indexOf('/') !== -1) {
+        let opIndex = sequenceVals.indexOf('/');
+        let numerator = sequenceVals[opIndex - 1];
+        let denominator = sequenceVals[opIndex + 1];
+        sequenceVals.splice(opIndex - 1, 3, TRANSLATION_INDEX['/'](numerator, denominator));
+    }
+    while (sequenceVals.indexOf('•') !== -1 || sequenceVals.indexOf('÷') !== -1) {
+        let firstMult = (sequenceVals.indexOf('•') !== -1) ? sequenceVals.indexOf('•') : Infinity;
+        let firstDiv = (sequenceVals.indexOf('÷') !== -1) ? sequenceVals.indexOf('÷') : Infinity;
+        let opIndex = Math.min(firstMult, firstDiv);
+        let operation = ['•', '÷'][(firstMult < firstDiv) ? 0 : 1];
+        let term1 = sequenceVals[opIndex - 1];
+        let term2 = sequenceVals[opIndex + 1];
+        sequenceVals.splice(opIndex - 1, 3, TRANSLATION_INDEX[operation](term1, term2));
+    }
+    while (sequenceVals.indexOf('+') !== -1 || sequenceVals.indexOf('-') !== -1) {
+        let firstAdd = (sequenceVals.indexOf('+') !== -1) ? sequenceVals.indexOf('+') : Infinity;
+        let firstSub = (sequenceVals.indexOf('-') !== -1) ? sequenceVals.indexOf('-') : Infinity;
+        let opIndex = Math.min(firstAdd, firstSub);
+        let operation = ['+', '-'][(firstAdd < firstSub) ? 0 : 1];
+        let term1 = sequenceVals[opIndex - 1];
+        let term2 = sequenceVals[opIndex + 1];
+        sequenceVals.splice(opIndex - 1, 3, TRANSLATION_INDEX[operation](term1, term2));
+    }
+    TRANSLATION_ELEMENT.textContent = sequenceVals.join(' ');
 }
 export function Translate() {
     const OUTPUT_STRING = EQUATION_STRING.map(a => a.val);
