@@ -1,4 +1,4 @@
-import { ButtonNumber, ButtonOperatorArith, Decimal, ButtonDelete, ButtonSign, Translate, Equal, Exponent } from "./indexModels.js"
+import { ButtonNumber, ButtonOperatorArith, ButtonDecimal, ButtonDelete, ButtonSign, TranslateSequence, ButtonEqual, ButtonExponent, SEQUENCE } from "./indexModels.js"
 
 const NUMBER_BUTTONS = [document.querySelector(`#btn9`) as HTMLButtonElement, 
                         document.querySelector(`#btn8`) as HTMLButtonElement, 
@@ -26,38 +26,39 @@ const EXP_BUTTON = document.querySelector(`#btnExp`) as HTMLButtonElement
 NUMBER_BUTTONS.forEach(button => {
     button.addEventListener('click', (event: Event) => {
         ButtonNumber(event)
-        Translate()
+        TranslateSequence(SEQUENCE)
     })
 })
 
 ARITHMETIC_BUTTONS.forEach(button => {
     button.addEventListener('click', (event: Event) => {
         ButtonOperatorArith(event)
-        Translate()
+        TranslateSequence(SEQUENCE)
     })
 })
 
 SGN_BUTTON.addEventListener('click', (e:Event) => {
     ButtonSign()
-    Translate()
+    TranslateSequence(SEQUENCE)
 })
 
 DEL_BUTTON.addEventListener('click', (e:Event) => {
     ButtonDelete()
-    Translate()
+    TranslateSequence(SEQUENCE)
 })
 
-
 DCM_BUTTON.addEventListener('click', (e:Event) => {
-    Decimal(e)
-    Translate()
+    ButtonDecimal()
+    TranslateSequence(SEQUENCE)
 })
 
 EQL_BUTTON.addEventListener('click', (e:Event) => {
-    Equal(e)
-    Translate()
+    ButtonEqual()
+    TranslateSequence(SEQUENCE)
 })
+
+
 EXP_BUTTON.addEventListener('click', (e:Event) => {
-    Exponent(e)
-    Translate()
+    ButtonExponent()
+    TranslateSequence(SEQUENCE)
 })
