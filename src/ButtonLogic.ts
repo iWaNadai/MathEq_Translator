@@ -1,40 +1,41 @@
-import { WCTTerm } from "./types"
+import { termType, WCTTerm } from "./types"
 
 const TRANSLATION_INDEX : {[key:string]:Function} = {
-    '+' : (addend1 : string, addend2 : string) => {       
+    '+' : (addend1 : string, addend2 : string, parenthesisMode : boolean = false) => {       
         if (addend1 === undefined || addend2 === undefined) {
             return 
         }
 
-        const translation = [`${addend1} added to ${addend2}`,`${addend1} increased by ${addend2}`,`${addend1} combined with ${addend2}`,`${addend1} together with ${addend2}`]
+        const translation = (parenthesisMode) ? [`the sum of ${addend1} and ${addend2}`] : [`${addend1} added to ${addend2}`,`${addend1} increased by ${addend2}`,`${addend1} combined with ${addend2}`,`${addend1} together with ${addend2}`]
         return translation[Math.floor(Math.random() * translation.length)]
     },
-    '-' : (minuend : string, subtrahend : string) => {
+    '-' : (minuend : string, subtrahend : string, parenthesisMode : boolean = false) => {
         if (minuend === undefined || subtrahend === undefined) {
             return 
         }
         
-        const translation = [`${minuend} reduced by ${subtrahend}`,`${minuend} decreased by ${subtrahend}`]
+        const translation = (parenthesisMode) ? [`the difference of ${minuend} and ${subtrahend}`] : [`${minuend} reduced by ${subtrahend}`,`${minuend} decreased by ${subtrahend}`]
         return translation[Math.floor(Math.random() * translation.length)]
     },
-    '•' : (multiplicand : string, multiplier : string) => {
+    '×' : (multiplicand : string, multiplier : string, parenthesisMode : boolean = false) => {
         if (multiplicand === undefined || multiplier === undefined) {
             return 
         }
         
-        const translation = [`${multiplicand} multiplied by ${multiplier}`,`${multiplicand} times ${multiplier}`,`the product of ${multiplicand} and ${multiplier}`]
+        const translation = (parenthesisMode) ? [`the product of ${multiplicand} and ${multiplier}`] : [`${multiplicand} multiplied by ${multiplier}`,`${multiplicand} times ${multiplier}`]
         return translation[Math.floor(Math.random() * translation.length)]
     },
-    '÷' : (dividend : string, divisor : string) => {
+    '÷' : (dividend : string, divisor : string, parenthesisMode : boolean = false) => {
         if (dividend === undefined || divisor === undefined) {
             return 
         }
         
-        const translation = [`${dividend} divided by ${divisor}`,`${dividend} grouped by ${divisor}`,`${dividend} grouped into ${divisor}`,`the quotient of ${dividend} and ${divisor}`]
+        const translation = (parenthesisMode) ? [`the quotient of ${dividend} and ${divisor}`] : [`${dividend} divided by ${divisor}`,`${dividend} grouped by ${divisor}`,`${dividend} grouped into ${divisor}`]
+
         return translation[Math.floor(Math.random() * translation.length)]
 
     },
-    '/' : (numerator : string | undefined, denominator : string | undefined) => {
+    '/' : (numerator : string, denominator : string) => {
         if (numerator === undefined || denominator === undefined) {
             return 
         }
@@ -43,7 +44,7 @@ const TRANSLATION_INDEX : {[key:string]:Function} = {
 
         return translation[Math.floor(Math.random() * translation.length)]
     },
-    '=' : (value1 : string | undefined, value2 : string | undefined) => {
+    '=' : (value1 : string, value2 : string) => {
         if (value1 === undefined || value2 === undefined) {
             return 
         }
@@ -51,7 +52,7 @@ const TRANSLATION_INDEX : {[key:string]:Function} = {
         const translation = [`${value1} is equal to ${value2}`,`${value1}, and ${value2} are equal`]
         return translation[Math.floor(Math.random() * translation.length)]
     },
-    '^' : (base : string | undefined, exponent : string | undefined) => {
+    '^' : (base : string, exponent : string) => {
         if (base === undefined || exponent === undefined) {
             return 
         }
@@ -88,10 +89,11 @@ const EQUATION_ELEMENT = document.querySelector(`#equation`) as HTMLDivElement
 const TRANSLATION_ELEMENT = document.querySelector(`#translation`) as HTMLElement
 
 let currentIndex : number = -1;
-const EQUATION_STRING : {val : string, type : ('number'|'operator'), element : HTMLElement}[] = []
+const colors : string[] = [];
+
 export const SEQUENCE : WCTTerm[] = [];
 
-function AddTerm(val : string, type : 'operator' | 'number') {
+function AddTerm(val : string, type : termType) {
     let element = document.createElement('p')
         element.textContent = val;
     let term : WCTTerm = {
@@ -274,6 +276,8 @@ export function ButtonDecimal() {
 export function ButtonEqual() {
     let lastTerm = SEQUENCE[currentIndex]
 
+    if (lastTerm === undefined) return
+
     if (lastTerm.type === 'number') {
         CorrectDecimal(lastTerm)
         AddTerm('=', 'operator')
@@ -291,16 +295,35 @@ export function ButtonExponent() {
     }
 }
 
+//PARENTHESES BUTTON LOGIC
+//check if open or close
+
+//if open
+    //generate new color
+    //generate new term, match it to new generated color
+//if close
+    //get closest parenthesis, get its color
+    //match it to received color
+export function ButtonParenthesis(event: Event) {
+    let input = (event.target as HTMLElement).dataset.value as string;
+
+    if (input === '(') {
+        console.log(colors)
+    }
+    else if (input === ')') {
+
+    }
+}
+
 
 //TRANSLATION LOGIC
-
 //have given sequence array
 //loop through sequence and translate all exponents
 //loop through sequence and translate all fractions
 //loop through sequence and translate all divisions and multiplication
 //loop through sequence and translate all addition and subtraction
 //loop through sequence and translate all equal operators
-export function TranslateSequence(sequence : WCTTerm[]) {
+export function TranslateSequence(sequence : WCTTerm[] = SEQUENCE, parenthesisMode : boolean = false) {
     let sequenceVals = sequence.map(a => a.value)
 
     while (sequenceVals.indexOf('^') !== -1) {
@@ -321,18 +344,22 @@ export function TranslateSequence(sequence : WCTTerm[]) {
         sequenceVals.splice(opIndex - 1, 3, TRANSLATION_INDEX['/'](numerator, denominator))
     }
 
-    while (sequenceVals.indexOf('•') !== -1 || sequenceVals.indexOf('÷') !== -1) {
-        let firstMult = (sequenceVals.indexOf('•') !== -1) ? sequenceVals.indexOf('•') : Infinity
+    while (sequenceVals.indexOf('×') !== -1 || sequenceVals.indexOf('÷') !== -1) {
+        let firstMult = (sequenceVals.indexOf('×') !== -1) ? sequenceVals.indexOf('×') : Infinity
         let firstDiv = (sequenceVals.indexOf('÷') !== -1) ? sequenceVals.indexOf('÷') : Infinity
 
         let opIndex = Math.min(firstMult, firstDiv);
 
-        let operation = ['•','÷'][(firstMult < firstDiv) ? 0 : 1]
+        let operation = ['×','÷'][(firstMult < firstDiv) ? 0 : 1]
 
         let term1 = sequenceVals[opIndex - 1]
         let term2 = sequenceVals[opIndex + 1]
-
-        sequenceVals.splice(opIndex - 1, 3, TRANSLATION_INDEX[operation](term1, term2))
+        
+        if (sequenceVals.length === 3) {
+            sequenceVals.splice(opIndex - 1, 3, TRANSLATION_INDEX[operation](term1, term2, parenthesisMode))
+        } else {
+            sequenceVals.splice(opIndex - 1, 3, TRANSLATION_INDEX[operation](term1, term2))
+        }
     }
 
     while (sequenceVals.indexOf('+') !== -1 || sequenceVals.indexOf('-') !== -1) {
@@ -346,101 +373,21 @@ export function TranslateSequence(sequence : WCTTerm[]) {
         let term1 = sequenceVals[opIndex - 1]
         let term2 = sequenceVals[opIndex + 1]
 
-        sequenceVals.splice(opIndex - 1, 3, TRANSLATION_INDEX[operation](term1, term2))
+        if (sequenceVals.length === 3) {
+            sequenceVals.splice(opIndex - 1, 3, TRANSLATION_INDEX[operation](term1, term2, parenthesisMode))
+        } else {
+            sequenceVals.splice(opIndex - 1, 3, TRANSLATION_INDEX[operation](term1, term2))
+        }    
+    }
+
+    while (sequenceVals.indexOf('=') !== -1) {
+        let opIndex = sequenceVals.indexOf('=');
+
+        let term1 = sequenceVals[opIndex - 1];
+        let term2 = sequenceVals[opIndex + 1];
+
+        sequenceVals.splice(opIndex - 1, 3, TRANSLATION_INDEX['='](term1, term2))
     }
 
     TRANSLATION_ELEMENT.textContent = sequenceVals.join(' ')
-}
-
-export function Translate() {
-    const OUTPUT_STRING : string[] = EQUATION_STRING.map(a => a.val)
-
-    while (OUTPUT_STRING.indexOf('^') > -1) {
-        //find indexes of all subtraction operators
-        const index = OUTPUT_STRING.indexOf('^')
-        //offset both sides by 1 (a - 1 && a + 1)
-        const base = OUTPUT_STRING[index - 1];
-        const exponent = OUTPUT_STRING[index + 1];
-
-        //use function 
-        //splice translation
-        OUTPUT_STRING.splice(index - 1, 3, TRANSLATION_INDEX['^'](base, exponent))
-    }
-        
-    while (OUTPUT_STRING.indexOf('/') > -1) {
-        //find indexes of all fraction operators
-        const index = OUTPUT_STRING.indexOf('/')
-        //offset both sides by 1 (a - 1 && a + 1)
-        const numerator = OUTPUT_STRING[index - 1] 
-        const denominator = OUTPUT_STRING[index + 1]
-        
-        //use function 
-        //splice translation
-        OUTPUT_STRING.splice(index - 1, 3, TRANSLATION_INDEX['/'](numerator, denominator))
-    }
-        
-    while (OUTPUT_STRING.indexOf('•') > -1) {
-        //find indexes of all multiplication operators
-        const index = OUTPUT_STRING.indexOf('•')
-        //offset both sides by 1 (a - 1 && a + 1)
-        const multiplicand = OUTPUT_STRING[index - 1];
-        const multiplier = OUTPUT_STRING[index + 1];
-
-        //use function 
-        //splice translation
-        OUTPUT_STRING.splice(index - 1, 3, TRANSLATION_INDEX['•'](multiplicand, multiplier))
-
-    }
-
-    while (OUTPUT_STRING.indexOf('÷') > -1) {
-        //find indexes of all division  operators
-        const index = OUTPUT_STRING.indexOf('÷')
-        //offset both sides by 1 (a - 1 && a + 1)
-        const dividend = OUTPUT_STRING[index - 1];
-        const divisor = OUTPUT_STRING[index + 1];
-
-        //use function 
-        //splice translation
-        OUTPUT_STRING.splice(index - 1, 3, TRANSLATION_INDEX['÷'](dividend, divisor))
-
-    }
-
-    while (OUTPUT_STRING.indexOf('+') > -1) {
-        //find indexes of all addition operators
-        const index = OUTPUT_STRING.indexOf('+')
-        //offset both sides by 1 (a - 1 && a + 1)
-        const addend1 = OUTPUT_STRING[index - 1];
-        const addend2 = OUTPUT_STRING[index + 1];
-
-        //use function 
-        //splice translation
-        OUTPUT_STRING.splice(index - 1, 3, TRANSLATION_INDEX['+'](addend1, addend2))
-    }
-
-    while (OUTPUT_STRING.indexOf('-') > -1) {
-        //find indexes of all subtraction operators
-        const index = OUTPUT_STRING.indexOf('-')
-        //offset both sides by 1 (a - 1 && a + 1)
-        const minuend = OUTPUT_STRING[index - 1];
-        const subtrahend = OUTPUT_STRING[index + 1];
-
-        //use function 
-        //splice translation
-        OUTPUT_STRING.splice(index - 1, 3, TRANSLATION_INDEX['-'](minuend, subtrahend))
-    }
-
-    while (OUTPUT_STRING.indexOf('=') > -1) {
-        //find indexes of all subtraction operators
-        const index = OUTPUT_STRING.indexOf('=')
-        //offset both sides by 1 (a - 1 && a + 1)
-        const term1 = OUTPUT_STRING[index - 1];
-        const term2 = OUTPUT_STRING[index + 1];
-
-        //use function 
-        //splice translation
-        OUTPUT_STRING.splice(index - 1, 3, TRANSLATION_INDEX['='](term1, term2))
-    }
-
-    TRANSLATION_ELEMENT.textContent = OUTPUT_STRING.join(' ')
-
 }

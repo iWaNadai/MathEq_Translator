@@ -1,57 +1,198 @@
+@import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@200;300;400;500;600;700;800;900&display=swap');
+
+$button-size : clamp(2rem, 9vw, 4.8rem);
+$button-border : clamp(.2rem, 1.5vw, .75rem);
+$button-font-size : clamp(.9rem, 3vw, 1.55rem);
+
+$color-0 : #ff5994;
+$color-1 : #84ff9f;
+$color-2 : #82b6ff;
+$color-3 : #ff9668;
+$color-4 : #edff8f;
+
+@function getShade($base-color) {
+    $shade : 0;
+    @if $base-color == $color-0 {
+        $shade: #c44ec6;
+    }
+    @if $base-color == $color-1 {
+        $shade: #63c3b8
+    }
+    @if $base-color == $color-2 {
+        $shade: #6073d1
+    }
+    @if $base-color == $color-3 {
+        $shade: #d95c75
+    }
+    @if $base-color == $color-4 {
+        $shade: hsl(40, 100%, 53%)
+    }
+        
+    @return $shade;
+}
+
+@function getHighlight($base-color) {
+    $highlight : 0;
+    @if $base-color == $color-0 {
+        $highlight: hsl(350, 85%, 75%);
+    }
+    @if $base-color == $color-1 {
+        $highlight: hsl(113, 85%, 85%)
+    }
+    @if $base-color == $color-2 {
+        $highlight: hsl(185, 85%, 85%)
+    }
+    @if $base-color == $color-3 {
+        $highlight: hsl(28, 85%, 75%)
+    }
+    @if $base-color == $color-4 {
+        $highlight: hsl(40, 75%, 90%)
+    }
+        
+    @return $highlight;
+}
+
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
-    color: white;
     font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
 }
 
 body {
     background-color: black;
-
+    display: grid;
+    place-items: center;
+    min-height: 100vh;
+    max-height: 100vw;
+    
     .container {
-        width: 100%;
-        max-height: auto;
+        width: Min(40rem, 80%);
         display: flex;
-        flex-direction: column;
         align-items: center;
+        padding: 2.5rem 0;
+        gap: 1.5rem;
+        flex-direction: column;
+        background-color: $color-1;
+        min-height: 75vh;
+        justify-content: flex-start;
+        border-radius: 2rem;
+        border-top: 1.8rem solid getHighlight($color-1);
+        border-left: 1.8rem solid getHighlight($color-1);
+        border-bottom: 1.8rem solid getShade($color-1);
+        border-right: 1.8rem solid getShade($color-1);
 
-        * {
-            width: Min(40rem, 90%);
+        .eq-ans,
+        h1 {
+            width: 85%;
         }
 
-        h1,
-        h2 {
+        .eq-ans {
+            font-size: 1.5rem;
+            display: grid;
+            grid-template-columns: 5fr 3fr;
+            gap: 1rem;        
+        }
+
+        h1 {
             font-size: 1.5rem;
             text-align: center;
+            font-family: 'Inconsolata', monospace;
         }
     }
 }
 
 .translation,
 .equation,
-.inputs {
-    border: .2rem solid white;
-    padding: 1rem;
-    margin: 1rem 5rem;
+.answer {
+    background-color: #738064;
+    color: #222126;
+    border-radius: 1rem;
+    border-top: .75rem solid getShade($color-1);
+    border-left: .75rem solid getShade($color-1);
+    border-bottom: .75rem solid getHighlight($color-1);
+    border-right: .75rem solid getHighlight($color-1);
+
+}
+
+.translation,
+.equation,
+.inputs,
+.answer {
+    padding: .5rem;
+    min-height: 1.5rem;
+    * {
+        font-size: 1.5rem;
+    }
 }
 
 .equation {
     display: flex;
     flex-direction: row;
-    * {
+    flex-wrap: wrap;
+    p {
         flex: 0 0 1.5rem;
     }
-    flex-wrap: wrap;
 }
 
 .inputs {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    gap: .5rem;
+    grid-template-columns: repeat(7, 1fr);
+    padding-block: 1rem;
+    place-items: center;
+    align-self: stretch;
     * {
+        color: black;
+        font-size: $button-font-size;
+    }
+    button {
+        width: $button-size;
         background-color: white;
         aspect-ratio: 1;
-        color: black;
-        font-size: 1.5rem;
+        border-radius: 20%;
+
+        &.number {
+            background-color: $color-0;
+            border-bottom: $button-border solid getShade($color-0);
+            border-right: $button-border solid getShade($color-0);
+            border-top: $button-border solid getHighlight($color-0);
+            border-left: $button-border solid getHighlight($color-0);
+        
+        }
+
+        &.grouper {
+            background-color: $color-2;
+            border-bottom: $button-border solid getShade($color-2);
+            border-right: $button-border solid getShade($color-2);
+            border-top: $button-border solid getHighlight($color-2);
+            border-left: $button-border solid getHighlight($color-2);
+    
+
+        }
+
+        &.operator {
+            background-color: $color-3;
+            border-bottom: $button-border solid getShade($color-3);
+            border-right: $button-border solid getShade($color-3);
+            border-top: $button-border solid getHighlight($color-3);
+            border-left: $button-border solid getHighlight($color-3);
+
+                
+        }
+
+        &.util {
+            background-color: $color-4;
+            border-bottom: $button-border solid getShade($color-4);
+            border-right: $button-border solid getShade($color-4); 
+            border-top: $button-border solid getHighlight($color-4);
+            border-left: $button-border solid getHighlight($color-4);
+  
+        }
+    }
+
+    img {
+        width: clamp(2.8rem, 18vw, 9.6rem);
+        grid-area: 3 / 6 / span 2 / span 2;
     }
 }

@@ -1,4 +1,4 @@
-import { ButtonNumber, ButtonOperatorArith, ButtonDecimal, ButtonDelete, ButtonSign, TranslateSequence, ButtonEqual, ButtonExponent, SEQUENCE } from "./ButtonLogic.js"
+import { ButtonNumber, ButtonOperatorArith, ButtonDecimal, ButtonDelete, ButtonSign, TranslateSequence, ButtonEqual, ButtonExponent, ButtonParenthesis } from "./ButtonLogic.js"
 
 const NUMBER_BUTTONS = [document.querySelector(`#btn9`) as HTMLButtonElement, 
                         document.querySelector(`#btn8`) as HTMLButtonElement, 
@@ -23,42 +23,51 @@ const SGN_BUTTON = document.querySelector(`#btnSign`) as HTMLButtonElement
 const EQL_BUTTON = document.querySelector(`#btnEql`) as HTMLButtonElement
 const EXP_BUTTON = document.querySelector(`#btnExp`) as HTMLButtonElement
 
+const GROUPERS = [document.querySelector(`#btnOPar`) as HTMLButtonElement,
+                  document.querySelector(`#btnCPar`) as HTMLButtonElement]
+
 NUMBER_BUTTONS.forEach(button => {
     button.addEventListener('click', (event: Event) => {
         ButtonNumber(event)
-        TranslateSequence(SEQUENCE)
+        TranslateSequence()
     })
 })
 
 ARITHMETIC_BUTTONS.forEach(button => {
     button.addEventListener('click', (event: Event) => {
         ButtonOperatorArith(event)
-        TranslateSequence(SEQUENCE)
+        TranslateSequence()
+    })
+})
+
+GROUPERS.forEach(button => {
+    button.addEventListener('click', (e:Event) => {
+        ButtonParenthesis(e)
+        TranslateSequence()
     })
 })
 
 SGN_BUTTON.addEventListener('click', (e:Event) => {
     ButtonSign()
-    TranslateSequence(SEQUENCE)
+    TranslateSequence()
 })
 
 DEL_BUTTON.addEventListener('click', (e:Event) => {
     ButtonDelete()
-    TranslateSequence(SEQUENCE)
+    TranslateSequence()
 })
 
 DCM_BUTTON.addEventListener('click', (e:Event) => {
     ButtonDecimal()
-    TranslateSequence(SEQUENCE)
+    TranslateSequence()
 })
 
 EQL_BUTTON.addEventListener('click', (e:Event) => {
     ButtonEqual()
-    TranslateSequence(SEQUENCE)
+    TranslateSequence()
 })
-
 
 EXP_BUTTON.addEventListener('click', (e:Event) => {
     ButtonExponent()
-    TranslateSequence(SEQUENCE)
+    TranslateSequence()
 })

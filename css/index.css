@@ -1,47 +1,91 @@
+@import url("https://fonts.googleapis.com/css2?family=Inconsolata:wght@200;300;400;500;600;700;800;900&display=swap");
 * {
   margin: 0;
   padding: 0;
-  -webkit-box-sizing: border-box;
-          box-sizing: border-box;
-  color: white;
   font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
 }
 
 body {
   background-color: black;
+  display: -ms-grid;
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  max-height: 100vw;
 }
 
 body .container {
-  width: 100%;
-  max-height: auto;
+  width: Min(40rem, 80%);
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding: 2.5rem 0;
+  gap: 1.5rem;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
       -ms-flex-direction: column;
           flex-direction: column;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  background-color: #84ff9f;
+  min-height: 75vh;
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+  border-radius: 2rem;
+  border-top: 1.8rem solid #c0f9b8;
+  border-left: 1.8rem solid #c0f9b8;
+  border-bottom: 1.8rem solid #63c3b8;
+  border-right: 1.8rem solid #63c3b8;
 }
 
-body .container * {
-  width: Min(40rem, 90%);
+body .container .eq-ans,
+body .container h1 {
+  width: 85%;
 }
 
-body .container h1,
-body .container h2 {
+body .container .eq-ans {
+  font-size: 1.5rem;
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: 5fr 3fr;
+      grid-template-columns: 5fr 3fr;
+  gap: 1rem;
+}
+
+body .container h1 {
   font-size: 1.5rem;
   text-align: center;
+  font-family: 'Inconsolata', monospace;
 }
 
 .translation,
 .equation,
-.inputs {
-  border: .2rem solid white;
-  padding: 1rem;
-  margin: 1rem 5rem;
+.answer {
+  background-color: #738064;
+  color: #222126;
+  border-radius: 1rem;
+  border-top: 0.75rem solid #63c3b8;
+  border-left: 0.75rem solid #63c3b8;
+  border-bottom: 0.75rem solid #c0f9b8;
+  border-right: 0.75rem solid #c0f9b8;
+}
+
+.translation,
+.equation,
+.inputs,
+.answer {
+  padding: .5rem;
+  min-height: 1.5rem;
+}
+
+.translation *,
+.equation *,
+.inputs *,
+.answer * {
+  font-size: 1.5rem;
 }
 
 .equation {
@@ -56,7 +100,7 @@ body .container h2 {
       flex-wrap: wrap;
 }
 
-.equation * {
+.equation p {
   -webkit-box-flex: 0;
       -ms-flex: 0 0 1.5rem;
           flex: 0 0 1.5rem;
@@ -65,14 +109,65 @@ body .container h2 {
 .inputs {
   display: -ms-grid;
   display: grid;
-  -ms-grid-columns: (1fr)[6];
-      grid-template-columns: repeat(6, 1fr);
+  gap: .5rem;
+  -ms-grid-columns: (1fr)[7];
+      grid-template-columns: repeat(7, 1fr);
+  padding-block: 1rem;
+  place-items: center;
+  -ms-grid-row-align: stretch;
+      align-self: stretch;
 }
 
 .inputs * {
+  color: black;
+  font-size: clamp(0.9rem, 3vw, 1.55rem);
+}
+
+.inputs button {
+  width: clamp(2rem, 9vw, 4.8rem);
   background-color: white;
   aspect-ratio: 1;
-  color: black;
-  font-size: 1.5rem;
+  border-radius: 20%;
+}
+
+.inputs button.number {
+  background-color: #ff5994;
+  border-bottom: clamp(0.2rem, 1.5vw, 0.75rem) solid #c44ec6;
+  border-right: clamp(0.2rem, 1.5vw, 0.75rem) solid #c44ec6;
+  border-top: clamp(0.2rem, 1.5vw, 0.75rem) solid #f5899b;
+  border-left: clamp(0.2rem, 1.5vw, 0.75rem) solid #f5899b;
+}
+
+.inputs button.grouper {
+  background-color: #82b6ff;
+  border-bottom: clamp(0.2rem, 1.5vw, 0.75rem) solid #6073d1;
+  border-right: clamp(0.2rem, 1.5vw, 0.75rem) solid #6073d1;
+  border-top: clamp(0.2rem, 1.5vw, 0.75rem) solid #b8f4f9;
+  border-left: clamp(0.2rem, 1.5vw, 0.75rem) solid #b8f4f9;
+}
+
+.inputs button.operator {
+  background-color: #ff9668;
+  border-bottom: clamp(0.2rem, 1.5vw, 0.75rem) solid #d95c75;
+  border-right: clamp(0.2rem, 1.5vw, 0.75rem) solid #d95c75;
+  border-top: clamp(0.2rem, 1.5vw, 0.75rem) solid #f5bc89;
+  border-left: clamp(0.2rem, 1.5vw, 0.75rem) solid #f5bc89;
+}
+
+.inputs button.util {
+  background-color: #edff8f;
+  border-bottom: clamp(0.2rem, 1.5vw, 0.75rem) solid #ffaf0f;
+  border-right: clamp(0.2rem, 1.5vw, 0.75rem) solid #ffaf0f;
+  border-top: clamp(0.2rem, 1.5vw, 0.75rem) solid #f9ecd2;
+  border-left: clamp(0.2rem, 1.5vw, 0.75rem) solid #f9ecd2;
+}
+
+.inputs img {
+  width: clamp(2.8rem, 18vw, 9.6rem);
+  -ms-grid-row: 3;
+  -ms-grid-row-span: 2;
+  -ms-grid-column: 6;
+  -ms-grid-column-span: 2;
+  grid-area: 3 / 6 / span 2 / span 2;
 }
 /*# sourceMappingURL=index.css.map */
