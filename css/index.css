@@ -44,6 +44,7 @@ body .container {
 body .container .eq-ans,
 body .container h1 {
   width: 85%;
+  text-align: center;
 }
 
 body .container .eq-ans {
