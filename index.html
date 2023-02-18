@@ -4,20 +4,24 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>MathEq Translator</title>
     <script type="module" src="./dest/EventCatching.js"></script>
-    <link rel="stylesheet" href="./css/index.css">
+    <script src="https://kit.fontawesome.com/c7f2ae1318.js" crossorigin="anonymous"></script>    <link rel="stylesheet" href="./css/index.css">
 </head>
 <body>
     <div class="container">
-        <h1 id="translation" class="translation">
-            Awaiting Input...
-        </h1>
+        <section class="transection">
+            <h1 id="translation" class="translation">
+                Awaiting Input...
+            </h1>
+            <button id="btnSpeak">
+                <i class="fa-solid fa-volume-high"></i>
+            </button>
+        </section>
         <section class="eq-ans">
-            <h2 id="equation" class="equation">
+            <h2 id="equation" class="equation"></h2>
             <h2 id="answer" class="answer"></h2>
         </section>
-        </h2>
         <section class="inputs">
             <button id="btn7" data-value="7" class="number">7</button>
             <button id="btn8" data-value="8" class="number">8</button>

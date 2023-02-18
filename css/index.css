@@ -2,7 +2,7 @@
 * {
   margin: 0;
   padding: 0;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Inconsolata', monospace;
   font-weight: bold;
 }
 
@@ -29,49 +29,110 @@ body .container {
   -webkit-box-direction: normal;
       -ms-flex-direction: column;
           flex-direction: column;
-  background-color: #84ff9f;
-  min-height: 75vh;
+  background-color: #a0d568;
   -webkit-box-pack: start;
       -ms-flex-pack: start;
           justify-content: flex-start;
   border-radius: 2rem;
-  border-top: 1.8rem solid #c0f9b8;
-  border-left: 1.8rem solid #c0f9b8;
-  border-bottom: 1.8rem solid #63c3b8;
-  border-right: 1.8rem solid #63c3b8;
+  border-top: 1.8rem solid #c5d99a;
+  border-left: 1.8rem solid #c5d99a;
+  border-bottom: 1.8rem solid #528567;
+  border-right: 1.8rem solid #528567;
 }
 
 body .container .eq-ans,
-body .container h1 {
+body .container .transection {
   width: 85%;
   text-align: center;
 }
 
-body .container .eq-ans {
+body .container .transection {
   font-size: 1.5rem;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  gap: 1rem;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+}
+
+body .container .transection h1 {
+  -webkit-box-flex: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+}
+
+body .container .transection button {
+  -webkit-box-flex: 0;
+      -ms-flex: 0 0 clamp(2rem, 9vw, 4.8rem);
+          flex: 0 0 clamp(2rem, 9vw, 4.8rem);
+  font-size: clamp(0.9rem, 3vw, 1.55rem);
+  background-color: white;
+  aspect-ratio: 1;
+  border-radius: 20%;
+  background-color: #ffce54;
+  border-bottom: clamp(0.2rem, 1.5vw, 0.75rem) solid #da911f;
+  border-right: clamp(0.2rem, 1.5vw, 0.75rem) solid #da911f;
+  border-top: clamp(0.2rem, 1.5vw, 0.75rem) solid #ffd77f;
+  border-left: clamp(0.2rem, 1.5vw, 0.75rem) solid #ffd77f;
+}
+
+body .container .transection button:active {
+  background-color: #da911f;
+  border-bottom: clamp(0.2rem, 1.5vw, 0.75rem) solid #da911f;
+  border-right: clamp(0.2rem, 1.5vw, 0.75rem) solid #da911f;
+  border-top: clamp(0.2rem, 1.5vw, 0.75rem) solid #ffce54;
+  border-left: clamp(0.2rem, 1.5vw, 0.75rem) solid #ffce54;
+}
+
+body .container .transection button i {
+  font-weight: 900;
+}
+
+body .container .eq-ans {
+  background-color: #738064;
+  color: #222126;
+  border-radius: 1rem;
+  border-top: 0.75rem solid #528567;
+  border-left: 0.75rem solid #528567;
+  border-bottom: 0.75rem solid #c5d99a;
+  border-right: 0.75rem solid #c5d99a;
   display: -ms-grid;
   display: grid;
-  -ms-grid-columns: 5fr 3fr;
-      grid-template-columns: 5fr 3fr;
-  gap: 1rem;
+  -ms-grid-rows: 1fr 1.25fr;
+      grid-template-rows: 1fr 1.25fr;
+}
+
+body .container .eq-ans h2 {
+  font-size: 1.5rem;
+  text-align: center;
+  height: 100%;
+  gap: .3rem;
+  overflow-x: scroll;
+}
+
+body .container .eq-ans h2 p {
+  -webkit-box-flex: 0;
+      -ms-flex: 0 0 1.5rem;
+          flex: 0 0 1.5rem;
+  background-color: #59634e;
 }
 
 body .container h1 {
   font-size: 1.5rem;
   text-align: center;
-  font-family: 'Inconsolata', monospace;
+  overflow-x: scroll;
 }
 
-.translation,
-.equation,
-.answer {
+.translation {
   background-color: #738064;
   color: #222126;
   border-radius: 1rem;
-  border-top: 0.75rem solid #63c3b8;
-  border-left: 0.75rem solid #63c3b8;
-  border-bottom: 0.75rem solid #c0f9b8;
-  border-right: 0.75rem solid #c0f9b8;
+  border-top: 0.75rem solid #528567;
+  border-left: 0.75rem solid #528567;
+  border-bottom: 0.75rem solid #c5d99a;
+  border-right: 0.75rem solid #c5d99a;
 }
 
 .translation,
@@ -101,12 +162,6 @@ body .container h1 {
       flex-wrap: wrap;
 }
 
-.equation p {
-  -webkit-box-flex: 0;
-      -ms-flex: 0 0 1.5rem;
-          flex: 0 0 1.5rem;
-}
-
 .inputs {
   display: -ms-grid;
   display: grid;
@@ -132,35 +187,67 @@ body .container h1 {
 }
 
 .inputs button.number {
-  background-color: #ff5994;
-  border-bottom: clamp(0.2rem, 1.5vw, 0.75rem) solid #c44ec6;
-  border-right: clamp(0.2rem, 1.5vw, 0.75rem) solid #c44ec6;
-  border-top: clamp(0.2rem, 1.5vw, 0.75rem) solid #f5899b;
-  border-left: clamp(0.2rem, 1.5vw, 0.75rem) solid #f5899b;
+  background-color: #ac92eb;
+  border-bottom: clamp(0.2rem, 1.5vw, 0.75rem) solid #525ebb;
+  border-right: clamp(0.2rem, 1.5vw, 0.75rem) solid #525ebb;
+  border-top: clamp(0.2rem, 1.5vw, 0.75rem) solid #d7a8f6;
+  border-left: clamp(0.2rem, 1.5vw, 0.75rem) solid #d7a8f6;
 }
 
-.inputs button.grouper {
-  background-color: #82b6ff;
-  border-bottom: clamp(0.2rem, 1.5vw, 0.75rem) solid #6073d1;
-  border-right: clamp(0.2rem, 1.5vw, 0.75rem) solid #6073d1;
-  border-top: clamp(0.2rem, 1.5vw, 0.75rem) solid #b8f4f9;
-  border-left: clamp(0.2rem, 1.5vw, 0.75rem) solid #b8f4f9;
+.inputs button.number:active {
+  background-color: #525ebb;
+  border-bottom: clamp(0.2rem, 1.5vw, 0.75rem) solid #525ebb;
+  border-right: clamp(0.2rem, 1.5vw, 0.75rem) solid #525ebb;
+  border-top: clamp(0.2rem, 1.5vw, 0.75rem) solid #ac92eb;
+  border-left: clamp(0.2rem, 1.5vw, 0.75rem) solid #ac92eb;
 }
 
 .inputs button.operator {
-  background-color: #ff9668;
-  border-bottom: clamp(0.2rem, 1.5vw, 0.75rem) solid #d95c75;
-  border-right: clamp(0.2rem, 1.5vw, 0.75rem) solid #d95c75;
-  border-top: clamp(0.2rem, 1.5vw, 0.75rem) solid #f5bc89;
-  border-left: clamp(0.2rem, 1.5vw, 0.75rem) solid #f5bc89;
+  background-color: #4fc1e8;
+  border-bottom: clamp(0.2rem, 1.5vw, 0.75rem) solid #1e78b9;
+  border-right: clamp(0.2rem, 1.5vw, 0.75rem) solid #1e78b9;
+  border-top: clamp(0.2rem, 1.5vw, 0.75rem) solid #8ccdf4;
+  border-left: clamp(0.2rem, 1.5vw, 0.75rem) solid #8ccdf4;
+}
+
+.inputs button.operator:active {
+  background-color: #1e78b9;
+  border-bottom: clamp(0.2rem, 1.5vw, 0.75rem) solid #1e78b9;
+  border-right: clamp(0.2rem, 1.5vw, 0.75rem) solid #1e78b9;
+  border-top: clamp(0.2rem, 1.5vw, 0.75rem) solid #4fc1e8;
+  border-left: clamp(0.2rem, 1.5vw, 0.75rem) solid #4fc1e8;
+}
+
+.inputs button.grouper {
+  background-color: #ed5564;
+  border-bottom: clamp(0.2rem, 1.5vw, 0.75rem) solid #cd3c2a;
+  border-right: clamp(0.2rem, 1.5vw, 0.75rem) solid #cd3c2a;
+  border-top: clamp(0.2rem, 1.5vw, 0.75rem) solid #f17c8a;
+  border-left: clamp(0.2rem, 1.5vw, 0.75rem) solid #f17c8a;
+}
+
+.inputs button.grouper:active {
+  background-color: #cd3c2a;
+  border-bottom: clamp(0.2rem, 1.5vw, 0.75rem) solid #cd3c2a;
+  border-right: clamp(0.2rem, 1.5vw, 0.75rem) solid #cd3c2a;
+  border-top: clamp(0.2rem, 1.5vw, 0.75rem) solid #ed5564;
+  border-left: clamp(0.2rem, 1.5vw, 0.75rem) solid #ed5564;
 }
 
 .inputs button.util {
-  background-color: #edff8f;
-  border-bottom: clamp(0.2rem, 1.5vw, 0.75rem) solid #ffaf0f;
-  border-right: clamp(0.2rem, 1.5vw, 0.75rem) solid #ffaf0f;
-  border-top: clamp(0.2rem, 1.5vw, 0.75rem) solid #f9ecd2;
-  border-left: clamp(0.2rem, 1.5vw, 0.75rem) solid #f9ecd2;
+  background-color: #ffce54;
+  border-bottom: clamp(0.2rem, 1.5vw, 0.75rem) solid #da911f;
+  border-right: clamp(0.2rem, 1.5vw, 0.75rem) solid #da911f;
+  border-top: clamp(0.2rem, 1.5vw, 0.75rem) solid #ffd77f;
+  border-left: clamp(0.2rem, 1.5vw, 0.75rem) solid #ffd77f;
+}
+
+.inputs button.util:active {
+  background-color: #da911f;
+  border-bottom: clamp(0.2rem, 1.5vw, 0.75rem) solid #da911f;
+  border-right: clamp(0.2rem, 1.5vw, 0.75rem) solid #da911f;
+  border-top: clamp(0.2rem, 1.5vw, 0.75rem) solid #ffce54;
+  border-left: clamp(0.2rem, 1.5vw, 0.75rem) solid #ffce54;
 }
 
 .inputs img {

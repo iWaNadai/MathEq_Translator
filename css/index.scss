@@ -4,58 +4,68 @@ $button-size : clamp(2rem, 9vw, 4.8rem);
 $button-border : clamp(.2rem, 1.5vw, .75rem);
 $button-font-size : clamp(.9rem, 3vw, 1.55rem);
 
-$color-0 : #ff5994;
-$color-1 : #84ff9f;
-$color-2 : #82b6ff;
-$color-3 : #ff9668;
-$color-4 : #edff8f;
-
 @function getShade($base-color) {
-    $shade : 0;
-    @if $base-color == $color-0 {
-        $shade: #c44ec6;
-    }
-    @if $base-color == $color-1 {
-        $shade: #63c3b8
-    }
-    @if $base-color == $color-2 {
-        $shade: #6073d1
-    }
-    @if $base-color == $color-3 {
-        $shade: #d95c75
-    }
-    @if $base-color == $color-4 {
-        $shade: hsl(40, 100%, 53%)
-    }
+    $shade : adjust-color($base-color, $hue: 10, $lightness: -20);
+    $shade : change-color($shade, $saturation: 60);
         
     @return $shade;
 }
 
 @function getHighlight($base-color) {
-    $highlight : 0;
-    @if $base-color == $color-0 {
-        $highlight: hsl(350, 85%, 75%);
-    }
-    @if $base-color == $color-1 {
-        $highlight: hsl(113, 85%, 85%)
-    }
-    @if $base-color == $color-2 {
-        $highlight: hsl(185, 85%, 85%)
-    }
-    @if $base-color == $color-3 {
-        $highlight: hsl(28, 85%, 75%)
-    }
-    @if $base-color == $color-4 {
-        $highlight: hsl(40, 75%, 90%)
-    }
+    $highlight : adjust-color($base-color, $hue: -10, $lightness: 5);
+    $highlight : change-color($highlight, $saturation: 50);
         
     @return $highlight;
+}
+
+@mixin calcu-button($colorID) {
+    $color : 0;
+    $shade : 0;
+    $highlight : 0;
+    
+    @if $colorID == 'number' {
+        $color : #ac92eb;
+        $shade : #525ebb;
+        $highlight : #d7a8f6;
+    }
+    @if $colorID == 'operator' {
+        $color : #4fc1e8;
+        $shade : #1e78b9;
+        $highlight : #8ccdf4;
+    }
+    @if $colorID == 'grouper' {
+        $color : #ed5564; 
+        $shade : #cd3c2a;
+        $highlight : #f17c8a;    
+
+
+    }
+    @if $colorID == 'util' {
+        $color : #ffce54;
+        $shade : #da911f;
+        $highlight : #ffd77f;
+    }
+
+    background-color: $color;
+    border-bottom: $button-border solid $shade;
+    border-right: $button-border solid $shade; 
+    border-top: $button-border solid $highlight;
+    border-left: $button-border solid $highlight;
+
+    &:active {
+        $base-color : $shade;
+        background-color: $base-color;
+        border-bottom: $button-border solid $base-color;
+        border-right: $button-border solid $base-color; 
+        border-top: $button-border solid $color;
+        border-left: $button-border solid $color;
+    }
 }
 
 * {
     margin: 0;
     padding: 0;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: 'Inconsolata', monospace;
     font-weight: bold;
 }
 
@@ -67,53 +77,99 @@ body {
     max-height: 100vw;
     
     .container {
+        $color : #a0d568;
+        $shade : #528567;
+        $highlight : #c5d99a;
         width: Min(40rem, 80%);
         display: flex;
         align-items: center;
         padding: 2.5rem 0;
         gap: 1.5rem;
         flex-direction: column;
-        background-color: $color-1;
-        min-height: 75vh;
+        background-color: $color;
         justify-content: flex-start;
         border-radius: 2rem;
-        border-top: 1.8rem solid getHighlight($color-1);
-        border-left: 1.8rem solid getHighlight($color-1);
-        border-bottom: 1.8rem solid getShade($color-1);
-        border-right: 1.8rem solid getShade($color-1);
+        border-top: 1.8rem solid $highlight;
+        border-left: 1.8rem solid $highlight;
+        border-bottom: 1.8rem solid $shade;
+        border-right: 1.8rem solid $shade;
 
         .eq-ans,
-        h1 {
+        .transection {
             width: 85%;
             text-align: center;
         }
 
-        .eq-ans {
+        .transection {
             font-size: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: space-between;
+            
+            h1 {
+                flex-grow: 1;
+            }
+
+            button {
+                flex: 0 0 $button-size;
+                font-size: $button-font-size;
+                background-color: white;
+                aspect-ratio: 1;
+                border-radius: 20%;
+        
+                @include calcu-button('util');
+
+                i {
+                    font-weight: 900
+                }
+        
+            }
+        }
+
+        .eq-ans {
+            $shade : #528567;
+            $highlight : #c5d99a;
+            background-color: #738064;
+            color: #222126;
+            border-radius: 1rem;
+            border-top: .75rem solid $shade;
+            border-left: .75rem solid $shade;
+            border-bottom: .75rem solid $highlight;
+            border-right: .75rem solid $highlight;
             display: grid;
-            grid-template-columns: 5fr 3fr;
-            gap: 1rem;        
+            grid-template-rows: 1fr 1.25fr; 
+            
+            h2 {
+                font-size: 1.5rem;
+                text-align: center;
+                height: 100%;
+                gap: .3rem;
+                overflow-x: scroll;
+                p {
+                    flex: 0 0 1.5rem;
+                    background-color: darken($color: #738064, $amount: 10);
+                }
+            }
         }
 
         h1 {
             font-size: 1.5rem;
             text-align: center;
-            font-family: 'Inconsolata', monospace;
+            overflow-x: scroll;
         }
     }
 }
 
-.translation,
-.equation,
-.answer {
+.translation {
+    $shade : #528567;
+    $highlight : #c5d99a;
     background-color: #738064;
     color: #222126;
     border-radius: 1rem;
-    border-top: .75rem solid getShade($color-1);
-    border-left: .75rem solid getShade($color-1);
-    border-bottom: .75rem solid getHighlight($color-1);
-    border-right: .75rem solid getHighlight($color-1);
-
+    border-top: .75rem solid $shade;
+    border-left: .75rem solid $shade;
+    border-bottom: .75rem solid $highlight;
+    border-right: .75rem solid $highlight;
 }
 
 .translation,
@@ -131,9 +187,6 @@ body {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    p {
-        flex: 0 0 1.5rem;
-    }
 }
 
 .inputs {
@@ -154,41 +207,19 @@ body {
         border-radius: 20%;
 
         &.number {
-            background-color: $color-0;
-            border-bottom: $button-border solid getShade($color-0);
-            border-right: $button-border solid getShade($color-0);
-            border-top: $button-border solid getHighlight($color-0);
-            border-left: $button-border solid getHighlight($color-0);
+            @include calcu-button('number')
+        }
         
+        &.operator {
+            @include calcu-button('operator')
         }
 
         &.grouper {
-            background-color: $color-2;
-            border-bottom: $button-border solid getShade($color-2);
-            border-right: $button-border solid getShade($color-2);
-            border-top: $button-border solid getHighlight($color-2);
-            border-left: $button-border solid getHighlight($color-2);
-    
-
-        }
-
-        &.operator {
-            background-color: $color-3;
-            border-bottom: $button-border solid getShade($color-3);
-            border-right: $button-border solid getShade($color-3);
-            border-top: $button-border solid getHighlight($color-3);
-            border-left: $button-border solid getHighlight($color-3);
-
-                
+            @include calcu-button('grouper')
         }
 
         &.util {
-            background-color: $color-4;
-            border-bottom: $button-border solid getShade($color-4);
-            border-right: $button-border solid getShade($color-4); 
-            border-top: $button-border solid getHighlight($color-4);
-            border-left: $button-border solid getHighlight($color-4);
-  
+            @include calcu-button('util')
         }
     }
 
