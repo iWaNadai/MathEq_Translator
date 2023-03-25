@@ -1,99 +1,86 @@
-import { ButtonNumber, ButtonOperatorArith, ButtonDecimal, ButtonDelete, ButtonSign, Translator, ButtonExponent, ButtonParenthesis, ButtonClear, ButtonRadical } from "./ButtonLogic.js"
+import { AddGroupers, AddNumber, AddOperator, Translate, AddUtility } from "./ButtonLogic.js"
+import EQH from "./Handlers/EquationHandler.js"
 
-const NUMBER_BUTTONS = [document.querySelector(`#btn9`) as HTMLButtonElement, 
-                        document.querySelector(`#btn8`) as HTMLButtonElement, 
-                        document.querySelector(`#btn7`) as HTMLButtonElement, 
-                        document.querySelector(`#btn6`) as HTMLButtonElement, 
-                        document.querySelector(`#btn5`) as HTMLButtonElement, 
-                        document.querySelector(`#btn4`) as HTMLButtonElement, 
-                        document.querySelector(`#btn3`) as HTMLButtonElement, 
-                        document.querySelector(`#btn2`) as HTMLButtonElement, 
-                        document.querySelector(`#btn1`) as HTMLButtonElement, 
-                        document.querySelector(`#btn0`) as HTMLButtonElement]
+const NUMBERS = Array.from(document.querySelectorAll('.number')) as HTMLButtonElement[]
+const OPERATORS = Array.from(document.querySelectorAll('.operator')) as HTMLButtonElement[]
+const UTILITY = Array.from(document.querySelectorAll('.utility')) as HTMLButtonElement[]
+const GROUPERS = Array.from(document.querySelectorAll('.grouper')) as HTMLButtonElement[]
 
-const ARITHMETIC_BUTTONS = [document.querySelector(`#btnAdd`) as HTMLButtonElement,
-                            document.querySelector(`#btnMns`) as HTMLButtonElement,
-                            document.querySelector(`#btnMlt`) as HTMLButtonElement,
-                            document.querySelector(`#btnDiv`) as HTMLButtonElement,
-                            document.querySelector(`#btnFrc`) as HTMLButtonElement]
+const TRANSLATE = document.querySelector('#btnTranslate') as HTMLButtonElement
+const SPEAK = document.querySelector('#btnSpeak') as HTMLButtonElement;
+const NEXT = document.querySelector('#btnNextScreen') as HTMLButtonElement;
+const PREV = document.querySelector('#btnPrevScreen') as HTMLButtonElement;
 
-const DCM_BUTTON = document.querySelector(`#btnDcm`) as HTMLButtonElement
-const DEL_BUTTON = document.querySelector(`#btnDel`) as HTMLButtonElement
-const CLR_BUTTON = document.querySelector(`#btnClear`) as HTMLButtonElement
-const SGN_BUTTON = document.querySelector(`#btnSign`) as HTMLButtonElement
-const EQL_BUTTON = document.querySelector(`#btnEql`) as HTMLButtonElement
-const EXP_BUTTON = document.querySelector(`#btnExp`) as HTMLButtonElement
+const CONSOLE = document.querySelector('.console') as HTMLElement;
 
-const GROUPERS = [document.querySelector(`#btnOPar`) as HTMLButtonElement,
-                  document.querySelector(`#btnCPar`) as HTMLButtonElement]
-
-const RAD_BUTTON = document.querySelector(`#btnRad`) as HTMLButtonElement;
-
-const SPEAK_BUTTON = document.querySelector(`#btnSpeak`) as HTMLButtonElement;
-
-let speechContent : string = 'awaiting input';
-let synth = window.speechSynthesis;
-
-SPEAK_BUTTON.addEventListener('click',(e : Event) => {
-    if (synth.speaking) {
-        return
-    }
-    let speech = new SpeechSynthesisUtterance(speechContent);
-    speech.rate = .8;
-    synth.speak(speech);
-})
-
-NUMBER_BUTTONS.forEach(button => {
-    button.addEventListener('click', (event: Event) => {
-        ButtonNumber(event)
-        speechContent = Translator()
+NUMBERS
+    .forEach(button => {
+        button.addEventListener('click', event => {
+            AddNumber(event)
+        })
     })
-})
 
-ARITHMETIC_BUTTONS.forEach(button => {
-    button.addEventListener('click', (event: Event) => {
-        ButtonOperatorArith(event)
-        speechContent = Translator()
+OPERATORS
+    .forEach(button => {
+        button.addEventListener('click', event => {
+            AddOperator(event)
+        })
     })
-})
 
-GROUPERS.forEach(button => {
-    button.addEventListener('click', (e:Event) => {
-        ButtonParenthesis(e)
-        speechContent = Translator()
+UTILITY
+    .forEach(button => {
+        button.addEventListener('click', event => {
+            AddUtility(event)
+        })
     })
+
+GROUPERS
+    .forEach(button => {
+        button.addEventListener('click', event => {
+            AddGroupers(event)
+        })
+    })
+
+TRANSLATE.addEventListener('click', event => {
+    Translate()
 })
 
-SGN_BUTTON.addEventListener('click', (e:Event) => {
-    ButtonSign()
-    speechContent = Translator()
+PREV.addEventListener('click', (event) => {
+    CONSOLE.scrollTo({top: 0, left: 0})
+    PREV.disabled = true;
+    NEXT.disabled = false;
 })
 
-DEL_BUTTON.addEventListener('click', (e:Event) => {
-    ButtonDelete()
-    speechContent = Translator()
+NEXT.addEventListener('click', (event) => {
+    CONSOLE.scrollTo({top: 0, left: CONSOLE.scrollWidth})
+
+    NEXT.disabled = true;
+    PREV.disabled = false;
 })
 
-DCM_BUTTON.addEventListener('click', (e:Event) => {
-    ButtonDecimal()
-    speechContent = Translator()
+SPEAK.addEventListener('click', (event) => {
+    let textToSpeak = new SpeechSynthesisUtterance(EQH.translation[0])
+
+    let speaker = window.speechSynthesis;
+
+    speaker.speak(textToSpeak)
 })
 
-EQL_BUTTON.addEventListener('click', (e:Event) => {
-    speechContent = Translator()
-})
+window.addEventListener('keydown', event => {
+    event.preventDefault()
+    let {key} = event
 
-EXP_BUTTON.addEventListener('click', (e:Event) => {
-    ButtonExponent()
-    speechContent = Translator()
-})
+    key = (key === 'Backspace') ? 'DEL' : key;
+    key = (key === '_') ? 'SIGN' : key;
+    key = (key === 'Tab') ? 'AC' : key;
+    key = (key === 'Tab') ? 'AC' : key;
+    key = (key === 'Enter') ? 'TRANSLATE' : key;
+    key = (key === 'ArrowRight') ? 'NEXT' : key;
+    key = (key === 'ArrowLeft') ? 'PREV' : key;
 
-CLR_BUTTON.addEventListener('click', (e:Event) => {
-    ButtonClear()
-    speechContent = Translator()
-})
+    let button = document.querySelector(`[data-value="${key}"]`) as HTMLButtonElement
 
-RAD_BUTTON.addEventListener('click', (e:Event) => {
-    ButtonRadical()
-    speechContent = Translator();
+    if (button === null) return
+
+    button.dispatchEvent(new Event('click'))
 })

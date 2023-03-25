@@ -1,363 +1,286 @@
-const EQUATION_ELEMENT = document.querySelector(`#equation`);
-const TRANSLATION_ELEMENT = document.querySelector(`#translation`);
-let currentIndex = -1;
-export let sequence = [];
-function AddTerm(val, type, id) {
-    let element = document.createElement('p');
-    element.textContent = val;
+import EQH from "./Handlers/EquationHandler.js";
+export function AddNumber(event) {
+    let target = event.target;
+    let value = target.dataset.value;
+    let lastTermType = EQH.GetLastTermType();
     let term = {
-        value: val,
-        type: type,
-        element: element,
-        id: id
+        value: value,
+        type: 'number'
     };
-    sequence.push(term);
-    EQUATION_ELEMENT.append(element);
-    currentIndex++;
-}
-function CorrectDecimal(term) {
-    if (!term.value.includes('.'))
-        return;
-    if (term.value.includes('(-')) {
-        let number = term.value.substring(2, term.value.length - 1);
-        term.value = `(-${number}0)`;
-        term.element.textContent = term.value;
+    if (lastTermType === 'none' || lastTermType !== 'number') {
+        EQH.AddTerm(term);
     }
     else {
-        term.value = `${term.value}0`;
-        term.element.textContent = term.value;
+        term.value = EQH.GetLastTermValue() + value;
+        EQH.EditLastTerm(term);
     }
 }
-function CorrectInteger(term) {
-    if (term.value === '(-)') {
-        term.value = '0';
-        term.element.textContent = term.value;
-    }
-}
-function* ParenthesesIdGenerator() {
-    let lastOpen = 0;
-    let lastClose = 0;
-    let input = '';
-    while (true) {
-        input = yield input;
-        if (input === '(') {
-            AddTerm('(', 'grouper', lastOpen);
-            lastOpen++;
-            yield sequence[currentIndex];
-        }
-        else if (input === ')') {
-            if (lastOpen > lastClose) {
-                AddTerm(')', 'grouper', lastClose);
-                lastClose++;
-            }
-            yield sequence[currentIndex];
-        }
-        else if (input === 'del (' || input === 'del )') {
-            (input.includes('(')) ? lastOpen-- : lastClose--;
-            yield sequence[currentIndex];
-        }
-    }
-}
-let Generator = ParenthesesIdGenerator();
-Generator.next();
-export function ButtonNumber(event) {
-    let input = event.target.dataset.value;
-    let lastTerm = sequence[currentIndex];
-    if (currentIndex === -1 || lastTerm.type === 'operator' || lastTerm.type === 'grouper' && lastTerm.value === '(') {
-        AddTerm(input, 'number');
-    }
-    else if (lastTerm.type === 'number') {
-        if (lastTerm.value.includes(')')) {
-            let number = lastTerm.value.substring(0, lastTerm.value.length - 1);
-            lastTerm.value = `${number}${input})`;
-            lastTerm.element.textContent = lastTerm.value;
-        }
-        else {
-            lastTerm.value += input;
-            lastTerm.element.textContent = lastTerm.value;
-        }
-    }
-}
-export function ButtonOperatorArith(event) {
-    let input = event.target.dataset.value;
-    let lastTerm = sequence[currentIndex];
-    if (lastTerm.type === 'number') {
-        CorrectDecimal(lastTerm);
-        CorrectInteger(lastTerm);
-        AddTerm(input, 'operator');
-    }
-    else if (lastTerm.type === 'grouper' && lastTerm.value === ')') {
-        AddTerm(input, 'operator');
-    }
-}
-export function ButtonSign() {
-    let lastTerm = sequence[currentIndex];
-    if (currentIndex === -1 || lastTerm.type === 'operator') {
-        AddTerm('(-)', 'number');
-    }
-    else if (lastTerm.type === 'number') {
-        if (lastTerm.value === '(-)') {
-            lastTerm.element.remove();
-            sequence.pop();
-            currentIndex--;
-        }
-        else if (lastTerm.value.includes('(-')) {
-            lastTerm.value = lastTerm.value.substring(2, lastTerm.value.length - 1);
-            lastTerm.element.textContent = lastTerm.value;
-        }
-        else {
-            lastTerm.value = `(-${lastTerm.value})`;
-            lastTerm.element.textContent = lastTerm.value;
-        }
-    }
-}
-export function ButtonDelete() {
-    let lastTerm = sequence[currentIndex];
-    if (lastTerm === undefined)
-        return;
-    if (lastTerm.type === 'operator') {
-        lastTerm.element.remove();
-        sequence.pop();
-        currentIndex--;
-    }
-    else if (lastTerm.type === 'grouper') {
-        if (lastTerm.value === '(') {
-            Generator.next('del (');
-        }
-        else if (lastTerm.value === ')') {
-            Generator.next('del )');
-        }
-        Generator.next();
-        lastTerm.element.remove();
-        sequence.pop();
-        currentIndex--;
-    }
-    else if (lastTerm.type === 'number') {
-        if (lastTerm.value.includes('(-') && lastTerm.value.length === 3) {
-            lastTerm.element.remove();
-            sequence.pop();
-            currentIndex--;
-        }
-        else if (lastTerm.value.includes('(-') && lastTerm.value.length > 3) {
-            let number = lastTerm.value.substring(0, lastTerm.value.length - 2);
-            lastTerm.value = `${number})`;
-            lastTerm.element.textContent = lastTerm.value;
-        }
-        if (!lastTerm.value.includes('(-') && lastTerm.value.length === 1) {
-            lastTerm.element.remove();
-            sequence.pop();
-            currentIndex--;
-        }
-        else if (!lastTerm.value.includes('(-') && lastTerm.value.length > 1) {
-            let number = lastTerm.value.substring(0, lastTerm.value.length - 1);
-            lastTerm.value = number;
-            lastTerm.element.textContent = lastTerm.value;
-        }
-    }
-}
-export function ButtonDecimal() {
-    let lastTerm = sequence[currentIndex];
-    if (currentIndex === -1 || lastTerm.type === 'operator') {
-        AddTerm('0.', 'number');
-    }
-    else if (lastTerm.type === 'number' && !lastTerm.value.includes('.')) {
-        if (lastTerm.value.includes('(-')) {
-            let number = lastTerm.value.substring(2, lastTerm.value.length - 1);
-            (number.length >= 1) ? lastTerm.value = `(-${number}.)` : lastTerm.value = `(-${number}0.)`;
-            lastTerm.element.textContent = lastTerm.value;
-        }
-        else if (!lastTerm.value.includes('(-')) {
-            lastTerm.value = `${lastTerm.value}.`;
-            lastTerm.element.textContent = lastTerm.value;
-        }
-    }
-}
-export function ButtonExponent() {
-    let lastTerm = sequence[currentIndex];
-    if (lastTerm.type === 'number') {
-        CorrectDecimal(lastTerm);
-        AddTerm('^', 'operator');
-    }
-}
-export function ButtonParenthesis(event) {
-    let input = event.target.dataset.value;
-    let lastTerm = sequence[currentIndex];
-    if (input === '(') {
-        if (lastTerm !== undefined && lastTerm.type === 'number')
+export function AddOperator(event) {
+    let target = event.target;
+    let value = target.dataset.value;
+    let lastTermType = EQH.GetLastTermType();
+    let lastTermValue = EQH.GetLastTermValue();
+    let terms = [];
+    const addBasic = () => {
+        if (lastTermType === 'operator')
             return;
-        Generator.next('(');
-        Generator.next();
-    }
-    else if (input === ')') {
-        Generator.next(')');
-        Generator.next();
-    }
-}
-export function ButtonClear() {
-    sequence = [];
-    Generator = ParenthesesIdGenerator();
-    Generator.next();
-    EQUATION_ELEMENT.innerHTML = '';
-    console.log(TRANSLATION_ELEMENT.innerHTML);
-    TRANSLATION_ELEMENT.innerHTML = 'Awaiting input...';
-    currentIndex = -1;
-}
-export function ButtonRadical() {
-    let lastTerm = sequence[currentIndex];
-    if (lastTerm === undefined) {
-        AddTerm('2', 'operator');
-        AddTerm('√', 'operator');
-    }
-    else {
-        AddTerm('√', 'operator');
-    }
-}
-export function Translator(Sequence = sequence, isTerm = false) {
-    let sequenceToTranslate = Sequence.map(a => a.value);
-    console.table(sequence);
-    let operatorInFocus;
-    let textToSpeak = '';
-    sequenceToTranslate = sequenceToTranslate.map(a => {
-        if (typeof Number(a.substring(1, a.length - 1)) === 'number' && Number(a.substring(1, a.length - 1)) < 0) {
-            return 'negative ' + Number(a.substring(2, a.length - 1)).toLocaleString();
+        if (lastTermValue === '(')
+            return;
+        value = (value === '*') ? '×' : value;
+        terms.push({ value: value, type: 'operator' });
+    };
+    const addRadical = () => {
+        if (lastTermType === 'none' || lastTermType === 'operator' || lastTermValue === '(') {
+            terms.push({ value: '2', type: 'number' });
         }
-        else if (isNaN(Number(a))) {
-            return a;
+        terms.push({ value: '√', type: 'operator' });
+    };
+    switch (value) {
+        case ('*'):
+        case ('÷'):
+        case ('+'):
+        case ('-'):
+        case ('/'):
+        case ('^'):
+            addBasic();
+            break;
+        case ('√'):
+            addRadical();
+            break;
+    }
+    terms.forEach(a => EQH.AddTerm(a));
+}
+export function AddUtility(event) {
+    let target = event.target;
+    let value = target.dataset.value;
+    let lastTermType = EQH.GetLastTermType();
+    let lastTermValue = EQH.GetLastTermValue();
+    const utilDelete = () => {
+        EQH.DeleteLastTerm();
+    };
+    const utilAllClear = () => {
+        EQH.ClearEquation();
+    };
+    const utilDecimal = () => {
+        if (lastTermType === 'number' && lastTermValue === '(-') {
+            let newTerm = `${EQH.GetLastTermValue()}0.`;
+            EQH.EditLastTerm({ value: newTerm, type: 'number' });
+        }
+        else if (lastTermType === 'number' && lastTermValue !== '(-') {
+            let newTerm = `${EQH.GetLastTermValue()}.`;
+            EQH.EditLastTerm({ value: newTerm, type: 'number' });
         }
         else {
-            return Number(a).toLocaleString();
+            EQH.AddTerm({ value: '0.', type: 'number' });
         }
-    });
-    const translationTemplates = (a = 'n', b = 'n', operator) => {
-        if (operator === '^' && isNaN(Number(b))) {
-            operator = '^x';
-        }
-        else if (operator === '^' && Number(b) === 1) {
-            operator = '^1';
-        }
-        else if (operator === '^' && Number(b) === 2) {
-            operator = '^2|';
-        }
-        else if (operator === '^' && Number(b) === 3) {
-            operator = '^3|';
-        }
-        else if (operator === '^' && b.endsWith('2')) {
-            operator = '^2';
-        }
-        else if (operator === '^' && b.endsWith('3')) {
-            operator = '^3';
-        }
-        else if (operator === '√' && a.endsWith('1')) {
-            operator = '1√';
-        }
-        else if (operator === '√' && a.endsWith('2')) {
-            operator = '2√';
-        }
-        else if (operator === '√' && a.endsWith('3')) {
-            operator = '3√';
-        }
-        else if (operator === '√' && Number(a) === 2) {
-            operator = '2|√';
-        }
-        else if (operator === '√' && Number(a) === 3) {
-            operator = '3|√';
-        }
-        if (b.endsWith(';')) {
-            b = b.replace(';', '');
-        }
-        if (isNaN(Number(b)))
-            b = `: ${b}`;
-        else
-            b = ` ${b}`;
-        const Templates = {
-            '^x': [`${a} to the power of${b}`],
-            '^': [`${a} to the power of${b}`, `${a} to the ${b}th power`],
-            '^1': [`${a} to the power of${b}`, `${a} to the ${b}st power`],
-            '^2': [`${a} to the power of${b}`, `${a} to the ${b}nd power`],
-            '^3': [`${a} to the power of${b}`, `${a} to the ${b}rd power`],
-            '^2|': [`${a} to the power of${b}`, `${a} to the ${b}nd power`, `${a} squared`],
-            '^3|': [`${a} to the power of${b}`, `${a} to the ${b}rd power`, `${a} cubed`],
-            '√': [`${a}th root of${b}`],
-            '1√': [`${a}st root of${b}`],
-            '2√': [`${a}nd root of${b}`],
-            '3√': [`${a}rd root of${b}`],
-            '2|√': [`${a}nd root of${b}`, `square root of${b}`],
-            '3|√': [`${a}rd root of${b}`, `cubed root of${b}`],
-            '/': [`${a} over${b}`],
-            '×': [`${a} multiplied by${b}`, `${a} times${b}`],
-            '÷': [`${a} divided by${b}`, `${a} grouped into${b}`],
-            '+': [`${a} added to${b}`, `${a} increased by${b}`, `${a} combined with${b}`],
-            '-': [`${a} reduced by${b}`, `${a} subtracted by${b}`]
-        };
-        const phraseIndex = Math.floor(Math.random() * Templates[operator].length);
-        console.log('translation: ', a, b, Templates[operator][phraseIndex]);
-        return Templates[operator][phraseIndex];
     };
-    operatorInFocus = sequenceToTranslate.indexOf('^');
-    while (operatorInFocus !== -1) {
-        let [a, , b] = sequenceToTranslate.slice(operatorInFocus - 1, operatorInFocus + 2);
-        sequenceToTranslate.splice(operatorInFocus - 1, 3, translationTemplates(a, b, '^') + ';');
-        operatorInFocus = sequenceToTranslate.indexOf('^');
-    }
-    operatorInFocus = sequenceToTranslate.indexOf('√');
-    while (operatorInFocus !== -1) {
-        let [a, , b] = sequenceToTranslate.slice(operatorInFocus - 1, operatorInFocus + 2);
-        sequenceToTranslate.splice(operatorInFocus - 1, 3, translationTemplates(a, b, '√') + ';');
-        operatorInFocus = sequenceToTranslate.indexOf('√');
-    }
-    operatorInFocus = sequenceToTranslate.indexOf('/');
-    while (operatorInFocus !== -1) {
-        let [a, , b] = sequenceToTranslate.slice(operatorInFocus - 1, operatorInFocus + 2);
-        sequenceToTranslate.splice(operatorInFocus - 1, 3, translationTemplates(a, b, '/') + ';');
-        operatorInFocus = sequenceToTranslate.indexOf('/');
-    }
-    let aOperator = (sequenceToTranslate.indexOf('×') !== -1) ? sequenceToTranslate.indexOf('×') : Infinity;
-    let bOperator = (sequenceToTranslate.indexOf('÷') !== -1) ? sequenceToTranslate.indexOf('÷') : Infinity;
-    operatorInFocus = Math.min(aOperator, bOperator);
-    while (operatorInFocus !== Infinity) {
-        let [a, operator, b] = sequenceToTranslate.slice(operatorInFocus - 1, operatorInFocus + 2);
-        let translation = translationTemplates(a, b, operator);
-        let nextOpIsInverse = sequenceToTranslate[operatorInFocus + 2] === '×' || sequenceToTranslate[operatorInFocus + 2] === '÷';
-        let equationLength = 3;
-        let endOperator = operatorInFocus;
-        while (nextOpIsInverse) {
-            endOperator += 2;
-            equationLength += 2;
-            operator = sequenceToTranslate[endOperator];
-            a = translation + ',';
-            b = sequenceToTranslate[endOperator + 1];
-            translation = translationTemplates(a, b, operator);
-            nextOpIsInverse = sequenceToTranslate[endOperator + 2] === '×' || sequenceToTranslate[endOperator + 2] === '÷';
+    const utilSign = () => {
+        if (lastTermType === 'number') {
+            let newTerm = `(-${EQH.GetLastTermValue()}`;
+            EQH.EditLastTerm({ value: newTerm, type: 'number' });
         }
-        sequenceToTranslate.splice(operatorInFocus - 1, equationLength, translation + ';');
-        aOperator = (sequenceToTranslate.indexOf('×') !== -1) ? sequenceToTranslate.indexOf('×') : Infinity;
-        bOperator = (sequenceToTranslate.indexOf('÷') !== -1) ? sequenceToTranslate.indexOf('÷') : Infinity;
-        operatorInFocus = Math.min(aOperator, bOperator);
-    }
-    aOperator = (sequenceToTranslate.indexOf('+') !== -1) ? sequenceToTranslate.indexOf('+') : Infinity;
-    bOperator = (sequenceToTranslate.indexOf('-') !== -1) ? sequenceToTranslate.indexOf('-') : Infinity;
-    operatorInFocus = Math.min(aOperator, bOperator);
-    while (operatorInFocus !== Infinity) {
-        let [a, operator, b] = sequenceToTranslate.slice(operatorInFocus - 1, operatorInFocus + 2);
-        let translation = translationTemplates(a, b, operator);
-        let nextOpIsInverse = sequenceToTranslate[operatorInFocus + 2] === '+' || sequenceToTranslate[operatorInFocus + 2] === '-';
-        let equationLength = 3;
-        let endOperator = operatorInFocus;
-        while (nextOpIsInverse) {
-            endOperator += 2;
-            equationLength += 2;
-            operator = sequenceToTranslate[endOperator];
-            a = translation + ',';
-            b = sequenceToTranslate[endOperator + 1];
-            translation = translationTemplates(a, b, operator);
-            nextOpIsInverse = sequenceToTranslate[endOperator + 2] === '+' || sequenceToTranslate[endOperator + 2] === '-';
+        else {
+            EQH.AddTerm({ value: '(-', type: 'number' });
         }
-        sequenceToTranslate.splice(operatorInFocus - 1, equationLength, translation + ';');
-        aOperator = (sequenceToTranslate.indexOf('+') !== -1) ? sequenceToTranslate.indexOf('+') : Infinity;
-        bOperator = (sequenceToTranslate.indexOf('-') !== -1) ? sequenceToTranslate.indexOf('-') : Infinity;
-        operatorInFocus = Math.min(aOperator, bOperator);
+    };
+    const utilEquals = () => {
+        alert('SOLVE IT YOURSELF FOR ONCE!!');
+    };
+    switch (value) {
+        case 'DEL':
+            utilDelete();
+            break;
+        case 'AC':
+            utilAllClear();
+            break;
+        case '.':
+            utilDecimal();
+            break;
+        case 'SIGN':
+            utilSign();
+            break;
+        case '=':
+            utilEquals();
+            break;
     }
-    TRANSLATION_ELEMENT.textContent = sequenceToTranslate.join('');
-    textToSpeak = sequenceToTranslate.join('');
-    return textToSpeak;
+}
+export function AddGroupers(event) {
+    let target = event.target;
+    let value = target.dataset.value;
+    let lastTermType = EQH.GetLastTermType();
+    let lastTermValue = EQH.GetLastTermValue();
+    if (lastTermType === 'number' && value === '(')
+        return;
+    if (lastTermType === 'operator' && value === ')')
+        return;
+    if (lastTermValue === '(' && value === ')')
+        return;
+    if (lastTermValue === ')' && value === '(')
+        return;
+    EQH.AddGrouper(value);
+    console.table(EQH.groupers);
+}
+export function Translate() {
+    EQH.Resolve();
+    const ATLAS = {};
+    const makeAlias = (atlas, value) => {
+        let entries = Object.entries(atlas);
+        if (entries.find(a => a[1] === value) !== undefined) {
+            return entries.find(a => a[1] === value)[0];
+        }
+        let aliasSource = 'abcdefghijklmnopqrstuvwxyz';
+        let alias = '';
+        do {
+            for (let i = 0; i < 10; i++) {
+                if (i === 0) {
+                    alias = aliasSource[Math.floor(Math.random() * aliasSource.length)];
+                    continue;
+                }
+                alias += aliasSource[Math.floor(Math.random() * aliasSource.length)];
+            }
+        } while (atlas[alias] !== undefined);
+        atlas[alias] = value;
+        return alias;
+    };
+    const commaNotate = (number) => {
+        if (number.includes('(-')) {
+            return `${Number(number.substring(1, number.length - 1)).toLocaleString()}`;
+        }
+        return number.toLocaleString();
+    };
+    let equation = EQH.equation
+        .map(item => {
+        if (item.type === 'number') {
+            let alias = makeAlias(ATLAS, commaNotate(item.value));
+            return alias;
+        }
+        return item.value;
+    })
+        .join('');
+    const INITIAL_NUMBERS = Object.keys(ATLAS);
+    const translate = (sequence) => {
+        let translation = '';
+        let sequenceParts = sequence.match(/([a-z]{10}|(\√|\^|\/|\×|\÷|\+|\-))/g);
+        let itterationCount = ((sequenceParts.length - 3) / 2);
+        console.log(itterationCount);
+        for (let i = 0; i <= itterationCount; i++) {
+            console.log(`Itteration ${i}`);
+            let opperand1 = ATLAS[sequenceParts[0]];
+            let operator = sequenceParts[1];
+            let opperand2 = (!INITIAL_NUMBERS.includes(sequenceParts[2])) ? ': ' + ATLAS[sequenceParts[2]] : ' ' + ATLAS[sequenceParts[2]];
+            if (operator === '√') {
+                if (opperand1 === '2') {
+                    operator = '2√';
+                }
+                else if (opperand1 === '3') {
+                    operator = '3√';
+                }
+                else if (opperand1.endsWith('2')) {
+                    operator = '...2√';
+                }
+                else if (opperand1.endsWith('3')) {
+                    operator = '...3√';
+                }
+            }
+            if (operator === '^') {
+                if (opperand2 === '2') {
+                    operator = '^2';
+                }
+                else if (opperand2 === '3') {
+                    operator = '^3';
+                }
+                else if (opperand2.endsWith('2')) {
+                    operator = '^...2';
+                }
+                else if (opperand2.endsWith('3')) {
+                    operator = '^...3';
+                }
+                else if (!INITIAL_NUMBERS.includes(sequenceParts[2])) {
+                    operator = '^x';
+                }
+            }
+            let translations = {
+                '+': [`${opperand1} added to${opperand2}`, `${opperand1} increased by${opperand2}`],
+                '-': [`${opperand1} reduced by${opperand2}`, `${opperand1} subtracted by${opperand2}`, `${opperand1} decreased by${opperand2}`],
+                '×': [`${opperand1} multiplied by${opperand2}`, `${opperand1} times${opperand2}`],
+                '÷': [`${opperand1} divided by${opperand2}`, `${opperand1} group into${opperand2}'s`],
+                '√': [`${opperand1}th root of${opperand2}`],
+                '2√': [`${opperand1}nd root of${opperand2}`, `squareroot of${opperand2}`],
+                '3√': [`${opperand1}rd root of${opperand2}`, `cuberoot of${opperand2}`],
+                '...2√': [`${opperand1}nd root of${opperand2}`],
+                '...3√': [`${opperand1}rd root of${opperand2}`],
+                '^': [`${opperand1} to the power of${opperand2}`, `${opperand1} to the${opperand2}th power`],
+                '^x': [`${opperand1} to the power of${opperand2}`],
+                '^2': [`${opperand1} to the ${opperand2}nd power`, `${opperand1} squared`],
+                '^3': [`${opperand1} to the ${opperand2}rd power`, `${opperand1} cubed`],
+                '^...2': [`${opperand1} to the ${opperand2}nd power`],
+                '^...3': [`${opperand1} to the ${opperand2}rd power`],
+                '/': [`${opperand1} over${opperand2}`],
+            };
+            translation = translations[operator][Math.floor(Math.random() * translations[operator].length)];
+            let endOfConEq = i === itterationCount;
+            let endsInSemi = translation.endsWith(';');
+            if (!endsInSemi) {
+                if (endOfConEq) {
+                    translation = translation + ';';
+                }
+                else {
+                    translation = translation + ',';
+                }
+            }
+            sequenceParts.splice(0, 3, makeAlias(ATLAS, translation));
+        }
+        console.log('sequences', sequenceParts.join(''));
+        return sequenceParts.join('');
+    };
+    while (equation.includes('(')) {
+        let Groups = equation.match(/\(([^()]*)\)/g) ?? [];
+        Groups.forEach(group => {
+            let groupEquation = group.replace('(', '').replace(')', '');
+            let fractionsGroup = group.match(/[a-z]{10}((\/)([a-z]{10}))+/g) ?? [];
+            fractionsGroup.forEach(a => {
+                let translation = translate(a);
+                groupEquation = groupEquation.replace(a, translation);
+            });
+            let exponentRadicalGroup = group.match(/[a-z]{10}((\^|\√)([a-z]{10}))+/g) ?? [];
+            exponentRadicalGroup.forEach(a => {
+                let translation = translate(a);
+                groupEquation = groupEquation.replace(a, translation);
+            });
+            let multiplicationDivisionGroup = group.match(/[a-z]{10}((\×|\÷)([a-z]{10}))+/g) ?? [];
+            multiplicationDivisionGroup.forEach(a => {
+                let translation = translate(a);
+                groupEquation = groupEquation.replace(a, translation);
+            });
+            let additionSubtractionGroup = group.match(/[a-z]{10}((\+|\-)([a-z]{10}))+/g) ?? [];
+            additionSubtractionGroup.forEach(a => {
+                let translation = translate(a);
+                groupEquation = groupEquation.replace(a, translation);
+            });
+            console.log(ATLAS);
+            equation = equation.replace(group, makeAlias(ATLAS, 'the term: ' + ATLAS[groupEquation]));
+        });
+    }
+    let Fractions = equation.match(/[a-z]{10}((\/)([a-z]{10}))+/g) ?? [];
+    Fractions.forEach(a => {
+        let translation = translate(a);
+        equation = equation.replace(a, translation);
+    });
+    let ExponentRadical = equation.match(/[a-z]{10}((\^|\√)([a-z]{10}))+/g) ?? [];
+    ExponentRadical.forEach(a => {
+        let translation = translate(a);
+        equation = equation.replace(a, translation);
+    });
+    let MultiplicationDivision = equation.match(/[a-z]{10}((\×|\÷)([a-z]{10}))+/g) ?? [];
+    MultiplicationDivision.forEach(a => {
+        let translation = translate(a);
+        equation = equation.replace(a, translation);
+    });
+    let AdditionSubtraction = equation.match(/[a-z]{10}((\+|\-)([a-z]{10}))+/g) ?? [];
+    AdditionSubtraction.forEach(a => {
+        let translation = translate(a);
+        equation = equation.replace(a, translation);
+    });
+    console.log('check', equation);
+    EQH.UpdateTranslation(ATLAS[equation].replaceAll('-', 'negative '));
 }
