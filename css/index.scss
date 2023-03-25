@@ -123,6 +123,7 @@ body {
     .container {
         width: Min(100%, 25rem);
         max-width: 25rem;
+        max-height: 300rem;
         aspect-ratio: 9 / 16;
         border-radius: 2rem;
         position: fixed;
@@ -130,6 +131,7 @@ body {
         grid-template-rows: 4fr 5fr;
         gap: 1rem;
         overflow-y: scroll;
+        overflow-x: hidden;
 
         div {
             border: $body-bevel-outer solid red;
