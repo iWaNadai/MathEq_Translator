@@ -32,10 +32,11 @@ body .container {
       grid-template-rows: 4fr 5fr;
   gap: 1rem;
   margin-bottom: 20rem;
+  scroll-behavior: smooth;
 }
 
 body .container div {
-  border: 1.75rem solid red;
+  border: 1rem solid red;
   border-radius: 2rem;
   position: relative;
   padding: 1rem;
@@ -154,10 +155,37 @@ body .container .keypad-body {
   text-align: left;
   background-color: transparent;
   color: #181d1a;
-  font-family: 'DotGothic16', monospace;
   font-size: 1rem;
   word-wrap: break-word;
+  font-family: 'DotGothic16', monospace;
   overflow: hidden;
+}
+
+.screen .console .carousel #solution {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+}
+
+.screen .console .carousel #solution .solution-entry {
+  text-align: left;
+  background-color: transparent;
+  color: #181d1a;
+  font-size: 1rem;
+  word-wrap: break-word;
+  font-family: 'DotGothic16', monospace;
+  font-style: none;
+}
+
+.screen .console .carousel #solution .solution-entry span {
+  background-color: #181d1a;
+  color: #606b58;
+  font-family: 'DotGothic16', monospace;
+  font-style: none;
 }
 
 .screen .screen-buttons {
@@ -179,10 +207,6 @@ body .container .keypad-body {
 
 .screen .screen-buttons button:active i {
   color: #181d1a;
-}
-
-.screen .screen-buttons button[disabled] {
-  visibility: hidden;
 }
 
 .screen .screen-buttons button i {

@@ -42,6 +42,8 @@ export function AddOperator(event) {
         case ('-'):
         case ('/'):
         case ('^'):
+            if (lastTermType === 'none')
+                return;
             addBasic();
             break;
         case ('√'):
@@ -56,9 +58,17 @@ export function AddUtility(event) {
     let lastTermType = EQH.GetLastTermType();
     let lastTermValue = EQH.GetLastTermValue();
     const utilDelete = () => {
+        if (lastTermType === 'grouper' && lastTermValue === '(') {
+            EQH.grouperCounters[0]--;
+        }
+        else if (lastTermType === 'grouper' && lastTermValue === ')') {
+            EQH.grouperCounters[1]--;
+        }
         EQH.DeleteLastTerm();
     };
     const utilAllClear = () => {
+        EQH.grouperCounters[0] = 0;
+        EQH.grouperCounters[1] = 0;
         EQH.ClearEquation();
     };
     const utilDecimal = () => {
@@ -84,7 +94,7 @@ export function AddUtility(event) {
         }
     };
     const utilEquals = () => {
-        alert('SOLVE IT YOURSELF FOR ONCE!!');
+        Solve();
     };
     switch (value) {
         case 'DEL':
@@ -105,7 +115,12 @@ export function AddUtility(event) {
     }
 }
 export function AddGroupers(event) {
-    let target = event.target;
+    if (event === undefined) {
+        EQH.AddTerm({ value: ')', type: 'grouper' });
+        EQH.grouperCounters[1]++;
+        return;
+    }
+    let target = (event).target;
     let value = target.dataset.value;
     let lastTermType = EQH.GetLastTermType();
     let lastTermValue = EQH.GetLastTermValue();
@@ -117,8 +132,17 @@ export function AddGroupers(event) {
         return;
     if (lastTermValue === ')' && value === '(')
         return;
-    EQH.AddGrouper(value);
-    console.table(EQH.groupers);
+    let term = { value: value, type: 'grouper' };
+    if (value === '(') {
+        EQH.AddTerm(term);
+        EQH.grouperCounters[0]++;
+    }
+    else if (value === ')' && EQH.grouperCounters[0] > EQH.grouperCounters[1]) {
+        EQH.AddTerm(term);
+        EQH.grouperCounters[1]++;
+    }
+}
+export function AddFunction(event) {
 }
 export function Translate() {
     EQH.Resolve();
@@ -144,9 +168,10 @@ export function Translate() {
     };
     const commaNotate = (number) => {
         if (number.includes('(-')) {
+            console.log(Number(number.substring(1, number.length - 1)).toLocaleString());
             return `${Number(number.substring(1, number.length - 1)).toLocaleString()}`;
         }
-        return number.toLocaleString();
+        return Number(number).toLocaleString();
     };
     let equation = EQH.equation
         .map(item => {
@@ -162,37 +187,41 @@ export function Translate() {
         let translation = '';
         let sequenceParts = sequence.match(/([a-z]{10}|(\√|\^|\/|\×|\÷|\+|\-))/g);
         let itterationCount = ((sequenceParts.length - 3) / 2);
-        console.log(itterationCount);
         for (let i = 0; i <= itterationCount; i++) {
-            console.log(`Itteration ${i}`);
-            let opperand1 = ATLAS[sequenceParts[0]];
+            let operand1 = ATLAS[sequenceParts[0]];
             let operator = sequenceParts[1];
-            let opperand2 = (!INITIAL_NUMBERS.includes(sequenceParts[2])) ? ': ' + ATLAS[sequenceParts[2]] : ' ' + ATLAS[sequenceParts[2]];
+            let operand2 = (!INITIAL_NUMBERS.includes(sequenceParts[2])) ? ': ' + ATLAS[sequenceParts[2]] : ' ' + ATLAS[sequenceParts[2]];
             if (operator === '√') {
-                if (opperand1 === '2') {
+                if (operand1.endsWith('1')) {
+                    operator = '...1√';
+                }
+                else if (operand1 === '2') {
                     operator = '2√';
                 }
-                else if (opperand1 === '3') {
+                else if (operand1 === '3') {
                     operator = '3√';
                 }
-                else if (opperand1.endsWith('2')) {
+                else if (operand1.endsWith('2')) {
                     operator = '...2√';
                 }
-                else if (opperand1.endsWith('3')) {
+                else if (operand1.endsWith('3')) {
                     operator = '...3√';
                 }
             }
             if (operator === '^') {
-                if (opperand2 === '2') {
+                if (operand2.endsWith('1')) {
+                    operator = '^...1';
+                }
+                else if (operand2 === '2') {
                     operator = '^2';
                 }
-                else if (opperand2 === '3') {
+                else if (operand2 === '3') {
                     operator = '^3';
                 }
-                else if (opperand2.endsWith('2')) {
+                else if (operand2.endsWith('2')) {
                     operator = '^...2';
                 }
-                else if (opperand2.endsWith('3')) {
+                else if (operand2.endsWith('3')) {
                     operator = '^...3';
                 }
                 else if (!INITIAL_NUMBERS.includes(sequenceParts[2])) {
@@ -200,22 +229,24 @@ export function Translate() {
                 }
             }
             let translations = {
-                '+': [`${opperand1} added to${opperand2}`, `${opperand1} increased by${opperand2}`],
-                '-': [`${opperand1} reduced by${opperand2}`, `${opperand1} subtracted by${opperand2}`, `${opperand1} decreased by${opperand2}`],
-                '×': [`${opperand1} multiplied by${opperand2}`, `${opperand1} times${opperand2}`],
-                '÷': [`${opperand1} divided by${opperand2}`, `${opperand1} group into${opperand2}'s`],
-                '√': [`${opperand1}th root of${opperand2}`],
-                '2√': [`${opperand1}nd root of${opperand2}`, `squareroot of${opperand2}`],
-                '3√': [`${opperand1}rd root of${opperand2}`, `cuberoot of${opperand2}`],
-                '...2√': [`${opperand1}nd root of${opperand2}`],
-                '...3√': [`${opperand1}rd root of${opperand2}`],
-                '^': [`${opperand1} to the power of${opperand2}`, `${opperand1} to the${opperand2}th power`],
-                '^x': [`${opperand1} to the power of${opperand2}`],
-                '^2': [`${opperand1} to the ${opperand2}nd power`, `${opperand1} squared`],
-                '^3': [`${opperand1} to the ${opperand2}rd power`, `${opperand1} cubed`],
-                '^...2': [`${opperand1} to the ${opperand2}nd power`],
-                '^...3': [`${opperand1} to the ${opperand2}rd power`],
-                '/': [`${opperand1} over${opperand2}`],
+                '+': [`${operand1} added to${operand2}`, `${operand1} increased by${operand2}`],
+                '-': [`${operand1} reduced by${operand2}`, `${operand1} subtracted by${operand2}`, `${operand1} decreased by${operand2}`],
+                '×': [`${operand1} multiplied by${operand2}`, `${operand1} times${operand2}`],
+                '÷': [`${operand1} divided by${operand2}`, `${operand1} group into${operand2}'s`],
+                '√': [`${operand1}th root of${operand2}`],
+                '2√': [`${operand1}nd root of${operand2}`, `squareroot of${operand2}`],
+                '3√': [`${operand1}rd root of${operand2}`, `cuberoot of${operand2}`],
+                '...1√': [`${operand1}st root of${operand2}`],
+                '...2√': [`${operand1}nd root of${operand2}`],
+                '...3√': [`${operand1}rd root of${operand2}`],
+                '^': [`${operand1} to the power of${operand2}`, `${operand1} to the${operand2}th power`],
+                '^...1': [`${operand1} to the power of${operand2}`, `${operand1} to the${operand2}st power`],
+                '^x': [`${operand1} to the power of${operand2}`],
+                '^2': [`${operand1} to the ${operand2}nd power`, `${operand1} squared`, `${operand1} to the power of${operand2}`],
+                '^3': [`${operand1} to the ${operand2}rd power`, `${operand1} cubed`, `${operand1} to the power of${operand2}`],
+                '^...2': [`${operand1} to the ${operand2}nd power`, `${operand1} to the power of${operand2}`],
+                '^...3': [`${operand1} to the ${operand2}rd power`, `${operand1} to the power of${operand2}`],
+                '/': [`${operand1} over${operand2}`],
             };
             translation = translations[operator][Math.floor(Math.random() * translations[operator].length)];
             let endOfConEq = i === itterationCount;
@@ -230,44 +261,44 @@ export function Translate() {
             }
             sequenceParts.splice(0, 3, makeAlias(ATLAS, translation));
         }
-        console.log('sequences', sequenceParts.join(''));
         return sequenceParts.join('');
     };
     while (equation.includes('(')) {
         let Groups = equation.match(/\(([^()]*)\)/g) ?? [];
         Groups.forEach(group => {
             let groupEquation = group.replace('(', '').replace(')', '');
+            let exponentRadicalGroup = groupEquation.match(/[a-z]{10}((\^|\√)([a-z]{10}))+/g) ?? [];
+            exponentRadicalGroup.forEach(a => {
+                let translation = translate(a);
+                groupEquation = groupEquation.replace(a, translation);
+            });
             let fractionsGroup = group.match(/[a-z]{10}((\/)([a-z]{10}))+/g) ?? [];
             fractionsGroup.forEach(a => {
                 let translation = translate(a);
                 groupEquation = groupEquation.replace(a, translation);
             });
-            let exponentRadicalGroup = group.match(/[a-z]{10}((\^|\√)([a-z]{10}))+/g) ?? [];
-            exponentRadicalGroup.forEach(a => {
-                let translation = translate(a);
-                groupEquation = groupEquation.replace(a, translation);
-            });
-            let multiplicationDivisionGroup = group.match(/[a-z]{10}((\×|\÷)([a-z]{10}))+/g) ?? [];
+            let multiplicationDivisionGroup = groupEquation.match(/[a-z]{10}((\×|\÷)([a-z]{10}))+/g) ?? [];
             multiplicationDivisionGroup.forEach(a => {
                 let translation = translate(a);
                 groupEquation = groupEquation.replace(a, translation);
             });
-            let additionSubtractionGroup = group.match(/[a-z]{10}((\+|\-)([a-z]{10}))+/g) ?? [];
+            let additionSubtractionGroup = groupEquation.match(/[a-z]{10}((\+|\-)([a-z]{10}))+/g) ?? [];
             additionSubtractionGroup.forEach(a => {
                 let translation = translate(a);
                 groupEquation = groupEquation.replace(a, translation);
             });
             console.log(ATLAS);
-            equation = equation.replace(group, makeAlias(ATLAS, 'the term: ' + ATLAS[groupEquation]));
+            let prefix = ['the term: ', 'the value of: ', 'the variable: '][Math.floor(Math.random() * 3)];
+            equation = equation.replace(group, makeAlias(ATLAS, prefix + ATLAS[groupEquation]));
         });
     }
-    let Fractions = equation.match(/[a-z]{10}((\/)([a-z]{10}))+/g) ?? [];
-    Fractions.forEach(a => {
+    let ExponentRadical = equation.match(/[a-z]{10}((\^|\√)([a-z]{10}))+/g) ?? [];
+    ExponentRadical.forEach(a => {
         let translation = translate(a);
         equation = equation.replace(a, translation);
     });
-    let ExponentRadical = equation.match(/[a-z]{10}((\^|\√)([a-z]{10}))+/g) ?? [];
-    ExponentRadical.forEach(a => {
+    let Fractions = equation.match(/[a-z]{10}((\/)([a-z]{10}))+/g) ?? [];
+    Fractions.forEach(a => {
         let translation = translate(a);
         equation = equation.replace(a, translation);
     });
@@ -281,6 +312,165 @@ export function Translate() {
         let translation = translate(a);
         equation = equation.replace(a, translation);
     });
-    console.log('check', equation);
     EQH.UpdateTranslation(ATLAS[equation].replaceAll('-', 'negative '));
 }
+export function Solve() {
+    EQH.Resolve();
+    const ATLAS = {};
+    const makeAlias = (atlas, value) => {
+        let entries = Object.entries(atlas);
+        if (value.includes('(-')) {
+            value = value.substring(1, value.length - 1);
+        }
+        if (entries.find(a => a[1] === Number(value)) !== undefined) {
+            return entries.find(a => a[1] === Number(value))[0];
+        }
+        let aliasSource = 'abcdefghijklmnopqrstuvwxyz';
+        let alias = '';
+        do {
+            for (let i = 0; i < 10; i++) {
+                if (i === 0) {
+                    alias = aliasSource[Math.floor(Math.random() * aliasSource.length)];
+                    continue;
+                }
+                alias += aliasSource[Math.floor(Math.random() * aliasSource.length)];
+            }
+        } while (atlas[alias] !== undefined);
+        atlas[alias] = Number(value);
+        return alias;
+    };
+    let equation = EQH.equation
+        .map(item => {
+        if (item.type === 'number') {
+            let alias = makeAlias(ATLAS, item.value);
+            return alias;
+        }
+        return item.value;
+    })
+        .join('');
+    let steps = [EQH.equation.map(a => a.value).join('')];
+    const solve = (sequence) => {
+        let answer = sequence;
+        let sequenceParts = sequence.match(/([a-z]{10}|(\√|\^|\/|\×|\÷|\+|\-))/g);
+        let [operand1, operator, operand2] = sequenceParts;
+        operand1 = ATLAS[operand1].toString();
+        operand2 = ATLAS[operand2].toString();
+        let answers = {
+            '^': (Number(operand1) ** Number(operand2)).toFixed(2),
+            '√': (Number(operand2) ** (1 / Number(operand1))).toFixed(2),
+            '/': (Number(operand1) / Number(operand2)).toFixed(2),
+            '×': (Number(operand1) * Number(operand2)).toFixed(2),
+            '÷': (Number(operand1) / Number(operand2)).toFixed(2),
+            '+': (Number(operand1) + Number(operand2)).toFixed(2),
+            '-': (Number(operand1) - Number(operand2)).toFixed(2),
+        };
+        sequenceParts.splice(0, 3, makeAlias(ATLAS, answers[operator]));
+        answer = sequenceParts.join('');
+        return answer;
+    };
+    while (equation.includes('(')) {
+        let Focus = equation.match(/\(([^()]*)\)/g)[0] ?? '';
+        let solveStep;
+        let newFocus;
+        if (Focus.includes('^') || Focus.includes('√')) {
+            solveStep = Focus.match(/[a-z]{10}((\^|\√)([a-z]{10}))+/g)[0];
+            newFocus = solve(solveStep);
+            newFocus = (newFocus.length === 10) ? newFocus : '(' + newFocus + ')';
+            equation = equation.replace(Focus, newFocus);
+            let newStep = equation;
+            Object.keys(ATLAS)
+                .forEach(a => {
+                newStep = newStep.replaceAll(a, ATLAS[a].toString());
+            });
+            steps.push(newStep);
+        }
+        else if (Focus.includes('/')) {
+            solveStep = Focus.match(/[a-z]{10}((\/)([a-z]{10}))+/g)[0];
+            newFocus = solve(solveStep);
+            newFocus = (newFocus.length === 10) ? newFocus : '(' + newFocus + ')';
+            equation = equation.replace(Focus, newFocus);
+            let newStep = equation;
+            Object.keys(ATLAS)
+                .forEach(a => {
+                newStep = newStep.replaceAll(a, ATLAS[a].toString());
+            });
+            steps.push(newStep);
+        }
+        else if (Focus.includes('×') || Focus.includes('÷')) {
+            solveStep = Focus.match(/[a-z]{10}((\×|\÷)([a-z]{10}))+/g)[0];
+            newFocus = solve(solveStep);
+            newFocus = (newFocus.length === 10) ? newFocus : '(' + newFocus + ')';
+            equation = equation.replace(Focus, newFocus);
+            let newStep = equation;
+            Object.keys(ATLAS)
+                .forEach(a => {
+                newStep = newStep.replaceAll(a, ATLAS[a].toString());
+            });
+            steps.push(newStep);
+        }
+        else if (Focus.includes('+') || Focus.includes('-')) {
+            solveStep = Focus.match(/[a-z]{10}((\+|\-)([a-z]{10}))+/g)[0];
+            newFocus = solve(solveStep);
+            newFocus = (newFocus.length === 10) ? newFocus : '(' + newFocus + ')';
+            equation = equation.replace(Focus, newFocus);
+            let newStep = equation;
+            Object.keys(ATLAS)
+                .forEach(a => {
+                newStep = newStep.replaceAll(a, ATLAS[a].toString());
+            });
+            steps.push(newStep);
+        }
+    }
+    let numberOfOperators = equation.match(/(\√|\^|\/|\×|\÷|\+|\-)/g)?.length;
+    for (let i = 0; i < numberOfOperators; i++) {
+        let Focus = equation;
+        let solveStep;
+        let newFocus;
+        if (Focus.includes('^') || Focus.includes('√')) {
+            solveStep = Focus.match(/[a-z]{10}((\^|\√)([a-z]{10}))+/g)[0];
+            newFocus = solve(solveStep);
+            equation = equation.replace(solveStep, newFocus);
+            let newStep = equation;
+            Object.keys(ATLAS)
+                .forEach(a => {
+                newStep = newStep.replaceAll(a, ATLAS[a].toString());
+            });
+            steps.push(newStep);
+        }
+        else if (Focus.includes('/')) {
+            solveStep = Focus.match(/[a-z]{10}((\/)([a-z]{10}))+/g)[0];
+            newFocus = solve(solveStep);
+            equation = equation.replace(solveStep, newFocus);
+            let newStep = equation;
+            Object.keys(ATLAS)
+                .forEach(a => {
+                newStep = newStep.replaceAll(a, ATLAS[a].toString());
+            });
+            steps.push(newStep);
+        }
+        else if (Focus.includes('×') || Focus.includes('÷')) {
+            solveStep = Focus.match(/[a-z]{10}((\×|\÷)([a-z]{10}))+/g)[0];
+            newFocus = solve(solveStep);
+            equation = equation.replace(solveStep, newFocus);
+            let newStep = equation;
+            Object.keys(ATLAS)
+                .forEach(a => {
+                newStep = newStep.replaceAll(a, ATLAS[a].toString());
+            });
+            steps.push(newStep);
+        }
+        else if (Focus.includes('+') || Focus.includes('-')) {
+            solveStep = Focus.match(/[a-z]{10}((\+|\-)([a-z]{10}))+/g)[0];
+            newFocus = solve(solveStep);
+            equation = equation.replace(solveStep, newFocus);
+            let newStep = equation;
+            Object.keys(ATLAS)
+                .forEach(a => {
+                newStep = newStep.replaceAll(a, ATLAS[a].toString());
+            });
+            steps.push(newStep);
+        }
+    }
+    EQH.UpdateSolution(steps);
+}
+//# sourceMappingURL=ButtonLogic.js.map

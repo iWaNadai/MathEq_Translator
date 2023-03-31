@@ -13,74 +13,74 @@ const PREV = document.querySelector('#btnPrevScreen') as HTMLButtonElement;
 
 const CONSOLE = document.querySelector('.console') as HTMLElement;
 
-NUMBERS
-    .forEach(button => {
-        button.addEventListener('click', event => {
-            AddNumber(event)
+export function InitializeListeners() {
+    NUMBERS
+        .forEach(button => {
+            button.addEventListener('click', event => {
+                AddNumber(event)
+            })
         })
+
+    OPERATORS
+        .forEach(button => {
+            button.addEventListener('click', event => {
+                AddOperator(event)
+            })
+        })
+
+    UTILITY
+        .forEach(button => {
+            button.addEventListener('click', event => {
+                AddUtility(event)
+            })
+        })
+
+    GROUPERS
+        .forEach(button => {
+            button.addEventListener('click', event => {
+                AddGroupers(event)
+            })
+        })
+
+    TRANSLATE.addEventListener('click', event => {
+        Translate()
     })
 
-OPERATORS
-    .forEach(button => {
-        button.addEventListener('click', event => {
-            AddOperator(event)
-        })
+    PREV.addEventListener('click', (event) => {
+        CONSOLE.scrollTo({top: 0, left: 0})
     })
 
-UTILITY
-    .forEach(button => {
-        button.addEventListener('click', event => {
-            AddUtility(event)
-        })
+    NEXT.addEventListener('click', (event) => { 
+        CONSOLE.scrollTo({top: 0, left: CONSOLE.scrollWidth})
     })
 
-GROUPERS
-    .forEach(button => {
-        button.addEventListener('click', event => {
-            AddGroupers(event)
-        })
+    SPEAK.addEventListener('click', (event) => {
+        let textToSpeak = new SpeechSynthesisUtterance(EQH.translation[0])
+
+        let speaker = window.speechSynthesis;
+
+        speaker.speak(textToSpeak)
     })
 
-TRANSLATE.addEventListener('click', event => {
-    Translate()
-})
+    window.addEventListener('keydown', event => {
+            event.preventDefault()
+        let {key} = event
 
-PREV.addEventListener('click', (event) => {
-    CONSOLE.scrollTo({top: 0, left: 0})
-    PREV.disabled = true;
-    NEXT.disabled = false;
-})
+        key = (key === 'Backspace') ? 'DEL' : key;
+        key = (key === '_') ? 'SIGN' : key;
+        key = (key === 'Tab') ? 'AC' : key;
+        key = (key === 'Tab') ? 'AC' : key;
+        key = (key === 'Enter') ? 'TRANSLATE' : key;
+        key = (key === 'ArrowRight') ? 'NEXT' : key;
+        key = (key === 'ArrowLeft') ? 'PREV' : key;
 
-NEXT.addEventListener('click', (event) => {
-    CONSOLE.scrollTo({top: 0, left: CONSOLE.scrollWidth})
+        let button = document.querySelector(`[data-value="${key}"]`) as HTMLButtonElement
 
-    NEXT.disabled = true;
-    PREV.disabled = false;
-})
+        if (button === null) return
 
-SPEAK.addEventListener('click', (event) => {
-    let textToSpeak = new SpeechSynthesisUtterance(EQH.translation[0])
+        button.dispatchEvent(new Event('click'))
+    })
 
-    let speaker = window.speechSynthesis;
+}
 
-    speaker.speak(textToSpeak)
-})
-
-window.addEventListener('keydown', event => {
-    event.preventDefault()
-    let {key} = event
-
-    key = (key === 'Backspace') ? 'DEL' : key;
-    key = (key === '_') ? 'SIGN' : key;
-    key = (key === 'Tab') ? 'AC' : key;
-    key = (key === 'Tab') ? 'AC' : key;
-    key = (key === 'Enter') ? 'TRANSLATE' : key;
-    key = (key === 'ArrowRight') ? 'NEXT' : key;
-    key = (key === 'ArrowLeft') ? 'PREV' : key;
-
-    let button = document.querySelector(`[data-value="${key}"]`) as HTMLButtonElement
-
-    if (button === null) return
-
-    button.dispatchEvent(new Event('click'))
-})
+InitializeListeners()

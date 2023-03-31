@@ -1,12 +1,16 @@
-import { WCTTerm, WCTGroup } from "../types"
+import { AddGroupers } from "../ButtonLogic.js";
+import { WCTTerm } from "../types"
 
 const EQUATION_ARRAY: WCTTerm[] = [];
 const CURRENT_INDEX: [number] = [-1];
-const GROUPERS: number[][] = []
 const EQUATION_VIEW: HTMLElement = document.querySelector('#equation') as HTMLElement
 const TRANSLATION_VIEW: HTMLElement = document.querySelector('#translation') as HTMLElement
+const SOLUTION_VIEW: HTMLElement = document.querySelector('#solution') as HTMLElement
 const TRANSLATION: [string] = [''];
 const CONTAINER_VIEW: HTMLElement = document.querySelector('.container') as HTMLElement
+const GROUPER_COUNTERS = [0,0]
+const CONSOLE_VIEW: HTMLElement = document.querySelector('.console') as HTMLElement
+
 //NATIVE FUNCTIONS
 function Update() {
     let children = Array.from(EQUATION_VIEW.children) as HTMLElement[]
@@ -72,12 +76,37 @@ function ResolveOperator() {
     }
 }
 
+function ResolveGroupers() {
+    let length = GROUPER_COUNTERS[0] - GROUPER_COUNTERS[1];
+
+    for (let i = 0; i < length; i++) {
+        AddGroupers()
+    }
+}
+
 //EXPORTED FUNCTIONS
 function UpdateTranslation(translation: string) {
     TRANSLATION[0] = translation;
 
     TRANSLATION_VIEW.innerText = translation
-    CONTAINER_VIEW.scrollTop = 0;
+
+    CONTAINER_VIEW.scrollTo({top: 0})
+    CONSOLE_VIEW.scrollTo({top: 0, left: 0})
+}
+
+function UpdateSolution(equation: string[]) {
+    SOLUTION_VIEW.innerHTML = '';
+
+    equation.forEach(string => {
+        let element = document.createElement('p')
+        element.classList.add('solution-entry')
+        element.innerHTML = 'x=' + string;
+
+        SOLUTION_VIEW.appendChild(element)
+    })
+    
+    CONTAINER_VIEW.scrollTo({top: 0})
+    CONSOLE_VIEW.scrollTo({top: 0, left: CONSOLE_VIEW.scrollWidth})
 }
 
 function DeleteLastTerm() {
@@ -102,12 +131,6 @@ function ClearEquation() {
     for (let i = 0; i < length; i++){
         EQUATION_ARRAY.pop();
         CURRENT_INDEX[0]--
-    }
-
-    length = GROUPERS.length
-
-    for (let i = 0; i < length; i++){
-        GROUPERS.pop();
     }
 
     Update()
@@ -146,74 +169,25 @@ function GetLastTermValue() {
     return term.value
 }
 
-function AddGrouper(type: '(' | ')') {
-    if (type === '(') {
-        AddTerm({value: type, type: 'grouper'})
-        GROUPERS.push([CURRENT_INDEX[0]])
-    }
-    else {
-        let {length} = GROUPERS;
-        for (let i = length - 1; i > -1; i--) {
-            if (GROUPERS[i].length === 1) {
-                AddTerm({value: type, type: 'grouper'})
-                GROUPERS[i].push(CURRENT_INDEX[0])
-                break;
-            }
-        }
-    }
-}
-
-function GetGrouperRanks() {    
-    let RankList: WCTGroup[][] = []
-
-    GROUPERS
-        .map(value => {
-            return {open : value[0], close : value[1]} as WCTGroup
-        })
-        .forEach((value, index) => {
-            let parenthesis = value as WCTGroup
-            if (index === 0) {
-                RankList[0] = [value]
-                return
-            }
-
-            RankList
-                .slice(0)
-                .reverse()
-                .forEach((rValue, rIndex) => {
-                    let condition = rValue.find((a) => (a.open < parenthesis.open && a.close > parenthesis.close))
-
-                    if (condition === undefined) {
-                        
-                    }
-                })
-            
-            RankList = RankList.reverse()
-        })
-    
-    return RankList
-}
-
 const EQH = {
     equation: EQUATION_ARRAY,
     index: CURRENT_INDEX,
-    groupers: GROUPERS,
     translation: TRANSLATION,
+    grouperCounters: GROUPER_COUNTERS,
     AddTerm,
     EditLastTerm,
     GetLastTermType,
     GetLastTermValue,
     DeleteLastTerm,
     ClearEquation,
-    AddGrouper,
     Resolve: () => {
         ResolveLastTerm()
         ResolveOperator()
-        // ResolveGroupers()
+        ResolveGroupers()
         Update()
     },
-    GetGrouperRanks,
-    UpdateTranslation
+    UpdateTranslation,
+    UpdateSolution
 }
 
 export default EQH

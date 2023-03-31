@@ -1,10 +1,13 @@
+import { AddGroupers } from "../ButtonLogic.js";
 const EQUATION_ARRAY = [];
 const CURRENT_INDEX = [-1];
-const GROUPERS = [];
 const EQUATION_VIEW = document.querySelector('#equation');
 const TRANSLATION_VIEW = document.querySelector('#translation');
+const SOLUTION_VIEW = document.querySelector('#solution');
 const TRANSLATION = [''];
 const CONTAINER_VIEW = document.querySelector('.container');
+const GROUPER_COUNTERS = [0, 0];
+const CONSOLE_VIEW = document.querySelector('.console');
 function Update() {
     let children = Array.from(EQUATION_VIEW.children);
     children.forEach(child => {
@@ -60,10 +63,28 @@ function ResolveOperator() {
         AddTerm({ value: '0', type: 'number' });
     }
 }
+function ResolveGroupers() {
+    let length = GROUPER_COUNTERS[0] - GROUPER_COUNTERS[1];
+    for (let i = 0; i < length; i++) {
+        AddGroupers();
+    }
+}
 function UpdateTranslation(translation) {
     TRANSLATION[0] = translation;
     TRANSLATION_VIEW.innerText = translation;
-    CONTAINER_VIEW.scrollTop = 0;
+    CONTAINER_VIEW.scrollTo({ top: 0 });
+    CONSOLE_VIEW.scrollTo({ top: 0, left: 0 });
+}
+function UpdateSolution(equation) {
+    SOLUTION_VIEW.innerHTML = '';
+    equation.forEach(string => {
+        let element = document.createElement('p');
+        element.classList.add('solution-entry');
+        element.innerHTML = 'x=' + string;
+        SOLUTION_VIEW.appendChild(element);
+    });
+    CONTAINER_VIEW.scrollTo({ top: 0 });
+    CONSOLE_VIEW.scrollTo({ top: 0, left: CONSOLE_VIEW.scrollWidth });
 }
 function DeleteLastTerm() {
     if (CURRENT_INDEX[0] <= -1)
@@ -83,10 +104,6 @@ function ClearEquation() {
     for (let i = 0; i < length; i++) {
         EQUATION_ARRAY.pop();
         CURRENT_INDEX[0]--;
-    }
-    length = GROUPERS.length;
-    for (let i = 0; i < length; i++) {
-        GROUPERS.pop();
     }
     Update();
 }
@@ -114,64 +131,25 @@ function GetLastTermValue() {
     }
     return term.value;
 }
-function AddGrouper(type) {
-    if (type === '(') {
-        AddTerm({ value: type, type: 'grouper' });
-        GROUPERS.push([CURRENT_INDEX[0]]);
-    }
-    else {
-        let { length } = GROUPERS;
-        for (let i = length - 1; i > -1; i--) {
-            if (GROUPERS[i].length === 1) {
-                AddTerm({ value: type, type: 'grouper' });
-                GROUPERS[i].push(CURRENT_INDEX[0]);
-                break;
-            }
-        }
-    }
-}
-function GetGrouperRanks() {
-    let RankList = [];
-    GROUPERS
-        .map(value => {
-        return { open: value[0], close: value[1] };
-    })
-        .forEach((value, index) => {
-        let parenthesis = value;
-        if (index === 0) {
-            RankList[0] = [value];
-            return;
-        }
-        RankList
-            .slice(0)
-            .reverse()
-            .forEach((rValue, rIndex) => {
-            let condition = rValue.find((a) => (a.open < parenthesis.open && a.close > parenthesis.close));
-            if (condition === undefined) {
-            }
-        });
-        RankList = RankList.reverse();
-    });
-    return RankList;
-}
 const EQH = {
     equation: EQUATION_ARRAY,
     index: CURRENT_INDEX,
-    groupers: GROUPERS,
     translation: TRANSLATION,
+    grouperCounters: GROUPER_COUNTERS,
     AddTerm,
     EditLastTerm,
     GetLastTermType,
     GetLastTermValue,
     DeleteLastTerm,
     ClearEquation,
-    AddGrouper,
     Resolve: () => {
         ResolveLastTerm();
         ResolveOperator();
+        ResolveGroupers();
         Update();
     },
-    GetGrouperRanks,
-    UpdateTranslation
+    UpdateTranslation,
+    UpdateSolution
 };
 export default EQH;
+//# sourceMappingURL=EquationHandler.js.map

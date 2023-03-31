@@ -101,7 +101,7 @@
     @include presets();
 }
 
-$body-bevel-outer: 1.75rem;
+$body-bevel-outer: 1rem;
 $body-bevel-inner-0: 1rem;
 $body-bevel-inner-1: .75rem;
 $button-bevel: .5rem;
@@ -131,6 +131,7 @@ body {
         grid-template-rows: 4fr 5fr;
         gap: 1rem;
         margin-bottom: 20rem;
+        scroll-behavior: smooth;
 
         div {
             border: $body-bevel-outer solid red;
@@ -224,6 +225,7 @@ body {
             align-items: start;
             flex-direction: row;
             width: 200%;
+            
 
             .translation, .solution{
                 flex: 1 1 100%;
@@ -232,10 +234,32 @@ body {
                 text-align: left;
                 background-color: transparent;
                 color: $screen-color-1;
-                font-family: 'DotGothic16', monospace;  
                 font-size: 1rem;
                 word-wrap: break-word;
+                font-family: 'DotGothic16', monospace;  
                 overflow: hidden;
+            }
+
+            #solution {
+                display: flex;
+                flex-direction: column;
+                
+                .solution-entry {
+                    text-align: left;
+                    background-color: transparent;
+                    color: $screen-color-1;
+                    font-size: 1rem;
+                    word-wrap: break-word;
+                    font-family: 'DotGothic16', monospace; 
+                    font-style: none;
+
+                    span {
+                        background-color: $screen-color-1;
+                        color: $screen-color-2;
+                        font-family: 'DotGothic16', monospace; 
+                        font-style: none;
+                    }
+                }
             }
         }
     }
@@ -256,10 +280,6 @@ body {
                 i {
                     color: $screen-color-1;
                 }
-            }
-
-            &[disabled] {
-                visibility: hidden;
             }
     
             i {
