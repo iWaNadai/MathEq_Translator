@@ -374,8 +374,8 @@ export function Solve() {
         let newFocus;
         if (Focus.includes('^') || Focus.includes('√')) {
             solveStep = Focus.match(/[a-z]{10}((\^|\√)([a-z]{10}))+/g)[0];
-            newFocus = solve(solveStep);
-            newFocus = (newFocus.length === 10) ? newFocus : '(' + newFocus + ')';
+            newFocus = Focus.replace(solveStep, solve(solveStep));
+            newFocus = (newFocus.length === 12) ? newFocus.replace('(', '').replace(')', '') : newFocus;
             equation = equation.replace(Focus, newFocus);
             let newStep = equation;
             Object.keys(ATLAS)
@@ -386,8 +386,8 @@ export function Solve() {
         }
         else if (Focus.includes('/')) {
             solveStep = Focus.match(/[a-z]{10}((\/)([a-z]{10}))+/g)[0];
-            newFocus = solve(solveStep);
-            newFocus = (newFocus.length === 10) ? newFocus : '(' + newFocus + ')';
+            newFocus = Focus.replace(solveStep, solve(solveStep));
+            newFocus = (newFocus.length === 12) ? newFocus.replace('(', '').replace(')', '') : newFocus;
             equation = equation.replace(Focus, newFocus);
             let newStep = equation;
             Object.keys(ATLAS)
@@ -398,8 +398,8 @@ export function Solve() {
         }
         else if (Focus.includes('×') || Focus.includes('÷')) {
             solveStep = Focus.match(/[a-z]{10}((\×|\÷)([a-z]{10}))+/g)[0];
-            newFocus = solve(solveStep);
-            newFocus = (newFocus.length === 10) ? newFocus : '(' + newFocus + ')';
+            newFocus = Focus.replace(solveStep, solve(solveStep));
+            newFocus = (newFocus.length === 12) ? newFocus.replace('(', '').replace(')', '') : newFocus;
             equation = equation.replace(Focus, newFocus);
             let newStep = equation;
             Object.keys(ATLAS)
@@ -410,8 +410,8 @@ export function Solve() {
         }
         else if (Focus.includes('+') || Focus.includes('-')) {
             solveStep = Focus.match(/[a-z]{10}((\+|\-)([a-z]{10}))+/g)[0];
-            newFocus = solve(solveStep);
-            newFocus = (newFocus.length === 10) ? newFocus : '(' + newFocus + ')';
+            newFocus = Focus.replace(solveStep, solve(solveStep));
+            newFocus = (newFocus.length === 12) ? newFocus.replace('(', '').replace(')', '') : newFocus;
             equation = equation.replace(Focus, newFocus);
             let newStep = equation;
             Object.keys(ATLAS)
